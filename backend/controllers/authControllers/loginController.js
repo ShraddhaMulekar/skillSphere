@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 
 export const loginController = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     // Find user and include password
     const user = await UserModel.findOne({ email }).select("+password");
