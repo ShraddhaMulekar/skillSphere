@@ -1,5 +1,6 @@
 import { UserModel } from "../../models/UserModel.js";
 import { generateToken } from "../../utils/generateToken.js";
+import bcrypt from "bcrypt";
 
 export const loginController = async (req, res) => {
   try {
