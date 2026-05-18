@@ -18,7 +18,7 @@ export const verifyEmail = async (req, res) => {
     user.emailVerificationToken = undefined;
     await user.save();
 
-    console.log({user})
+    // console.log({user})
     return res
       .status(200)
       .json({ success: true, message: "Email verified successfully" });
