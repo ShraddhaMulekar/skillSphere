@@ -22,7 +22,7 @@ export const registerController = async (req, res) => {
     // Check if user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-        console.log({existingUser})
+        // console.log({existingUser})
       return res
         .status(400)
         .json({ success: false, message: "User already exists" });
@@ -71,7 +71,7 @@ export const registerController = async (req, res) => {
     // Generate JWT token
     const token = generateToken(newUser._id, newUser.role);
 
-            console.log({token, newUser})
+            // console.log({token, newUser})
     return res.status(201).json({
       success: true,
       token,
@@ -84,7 +84,7 @@ export const registerController = async (req, res) => {
       },
     });
   } catch (error) {
-            console.log({error})
+            // console.log({error})
     return res.status(500).json({
       success: false,
       message: "Error occurred while registering user",
