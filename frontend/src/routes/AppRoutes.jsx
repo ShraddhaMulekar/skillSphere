@@ -4,8 +4,13 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import VerifyEmail from "../pages/VerifyEmail";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
+import TwoFactorLogin from "../pages/TwoFactorLogin";
+import GoogleCallback from "../pages/GoogleCallback";
 import Dashboard from "../pages/Dashboard";
 import Profile from "../pages/Profile";
+import Admin from "../pages/Admin";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 
@@ -28,6 +33,7 @@ export default function AppRoutes() {
             </PublicOnly>
           }
         />
+        <Route path="/login/2fa" element={<TwoFactorLogin />} />
         <Route
           path="/register"
           element={
@@ -36,7 +42,10 @@ export default function AppRoutes() {
             </PublicOnly>
           }
         />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
         <Route
           element={
@@ -47,6 +56,14 @@ export default function AppRoutes() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -10,6 +10,7 @@ import Card from "../components/ui/Card";
 import Alert from "../components/ui/Alert";
 import { registerUser } from "../api/authApi";
 import { setCredentials } from "../store/authSlice";
+import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 
 const roleOptions = [
   { value: "client", label: "Client – I want to hire" },
@@ -117,6 +118,15 @@ export default function Register() {
             {mutation.isPending ? "Creating account..." : "Create Account"}
           </Button>
         </form>
+
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-white/20" />
+          <span className="text-white/50 text-sm">or</span>
+          <div className="flex-1 h-px bg-white/20" />
+        </div>
+
+        <GoogleSignInButton role={form.role} />
+
         <p className="text-center text-white/70 mt-6 text-sm">
           Already have an account?{" "}
           <Link to="/login" className="text-cyan-300 hover:underline font-medium">

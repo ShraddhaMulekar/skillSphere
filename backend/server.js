@@ -2,17 +2,21 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
+import passport from "passport";
 import { connectDB } from "./config/mongoDB.js";
+import { configurePassport } from "./config/passport.js";
 import { authRoutes } from "./routes/authRoutes.js";
 import { userRoutes } from "./routes/userRoutes.js";
 import { adminRoutes } from "./routes/adminRoutes.js";
 
 dotenv.config();
+configurePassport();
 
 const app = express();
 const port = process.env.PORT || 8080;
 
 app.use(helmet());
+app.use(passport.initialize());
 app.use(express.json());
 app.use(
   cors({

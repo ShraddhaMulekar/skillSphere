@@ -1,25 +1,34 @@
 import { UserModel } from "../../models/UserModel.js";
-import { generateToken } from "../../utils/generateToken.js";
 import bcrypt from "bcrypt";
+import { sendAuthSuccess, toPublicUser } from "../../utils/authResponse.js";
+import { issue2FATempToken } from "./twoFactorController.js";
 
 export const loginController = async (req, res) => {
   try {
     const { email, password } = req.body || {};
 
-    // Validate input
     if (!email || !password) {
       return res
         .status(400)
         .json({ success: false, message: "Email and password are required" });
     }
 
-    // Find user
-    const user = await UserModel.findOne({ email }).select("+password");
+    const user = await UserModel.findOne({ email: email.toLowerCase() }).select(
+      "+password",
+    );
+
     if (!user) {
       return res.status(401).json({ success: false, message: "Invalid email" });
     }
 
-    // Check password
+    if (user.authProvider === "google" && !user.password) {
+      return res.status(401).json({
+        success: false,
+        message: "This account uses Google sign-in. Please continue with Google.",
+        code: "USE_GOOGLE_AUTH",
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res
@@ -27,20 +36,17 @@ export const loginController = async (req, res) => {
         .json({ success: false, message: "Invalid password" });
     }
 
-    // Generate token
-    const token = generateToken(user._id, user.role);
+    if (user.twoFactorEnabled) {
+      const tempToken = issue2FATempToken(user);
+      return res.status(200).json({
+        success: true,
+        requires2FA: true,
+        tempToken,
+        user: toPublicUser(user),
+      });
+    }
 
-    return res.status(200).json({
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isVerified: user.isVerified,
-      },
-    });
+    return sendAuthSuccess(res, user);
   } catch (error) {
     return res.status(500).json({
       success: false,

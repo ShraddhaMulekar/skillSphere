@@ -6,6 +6,7 @@ import { updateUser } from "../store/authSlice";
 import Button from "../components/ui/Button";
 import Alert from "../components/ui/Alert";
 import Loader from "../components/ui/Loader";
+import SecuritySettings from "../components/security/SecuritySettings";
 
 export default function Profile() {
   const { user } = useSelector((state) => state.auth);
@@ -210,6 +211,8 @@ export default function Profile() {
             {mutation.isPending ? "Saving..." : "Save Profile"}
           </Button>
         </form>
+
+        <SecuritySettings />
       </div>
     </div>
   );

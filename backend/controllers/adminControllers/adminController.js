@@ -3,7 +3,9 @@ import { UserModel } from "../../models/UserModel.js";
 export const getAllUsers = async (req, res) => {
   try {
     const users = await UserModel.find()
-      .select("-password -emailVerificationToken")
+      .select(
+        "-password -emailVerificationToken -passwordResetToken -twoFactorSecret",
+      )
       .sort({ createdAt: -1 });
 
     return res.status(200).json({

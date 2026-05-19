@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ALL_ROLES, ROLES } from "../constants/roles.js";
 
 const skillSchema = new mongoose.Schema(
   {
@@ -9,7 +10,7 @@ const skillSchema = new mongoose.Schema(
       default: "intermediate",
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const userSchema = new mongoose.Schema(
@@ -27,14 +28,23 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
       minLength: [6, "Password must be at least 6 characters long"],
       select: false,
     },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
     role: {
       type: String,
-      enum: ["client", "freelancer", "admin"],
-      default: "client",
+      enum: ALL_ROLES,
+      default: ROLES.CLIENT,
     },
     isVerified: {
       type: Boolean,
@@ -51,17 +61,29 @@ const userSchema = new mongoose.Schema(
     skills: [skillSchema],
     hourlyRate: { type: Number, default: 0 },
     emailVerificationToken: String,
+    emailVerificationExpire: Date,
     passwordResetToken: String,
     passwordResetExpire: Date,
     twoFactorEnabled: {
       type: Boolean,
       default: false,
     },
+    twoFactorSecret: {
+      type: String,
+      select: false,
+    },
   },
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
+
+userSchema.pre("validate", function (next) {
+  if (this.authProvider === "local" && !this.password && !this.googleId) {
+    this.invalidate("password", "Password is required for local accounts");
+  }
+  next();
+});
 
 export const UserModel = mongoose.model("user", userSchema);

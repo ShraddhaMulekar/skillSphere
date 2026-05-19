@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import AuthLayout from "../components/layout/AuthLayout";
@@ -7,6 +7,7 @@ import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Alert from "../components/ui/Alert";
+import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 import { loginUser } from "../api/authApi";
 import { setCredentials } from "../store/authSlice";
 
@@ -15,10 +16,22 @@ export default function Login() {
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("error") === "google_auth_failed") {
+      setError("Google sign-in failed. Please try again.");
+    }
+  }, [searchParams]);
 
   const mutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (res) => {
+      if (res.data.requires2FA) {
+        sessionStorage.setItem("temp2FAToken", res.data.tempToken);
+        navigate("/login/2fa");
+        return;
+      }
       const { token, user } = res.data;
       dispatch(setCredentials({ token, user }));
       navigate("/dashboard");
@@ -71,6 +84,14 @@ export default function Login() {
             placeholder="••••••••"
             required
           />
+          <div className="text-right -mt-2 mb-2">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-cyan-300 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <Button
             type="submit"
             className="w-full mt-2"
@@ -79,11 +100,23 @@ export default function Login() {
             {mutation.isPending ? "Signing in..." : "Sign In"}
           </Button>
         </form>
+
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-white/20" />
+          <span className="text-white/50 text-sm">or</span>
+          <div className="flex-1 h-px bg-white/20" />
+        </div>
+
+        <GoogleSignInButton />
+
         <p className="text-center text-white/70 mt-6 text-sm">
           Don&apos;t have an account?{" "}
           <Link to="/register" className="text-pink-300 hover:underline font-medium">
             Register
           </Link>
+        </p>
+        <p className="text-center text-white/50 mt-3 text-xs">
+          Admin? Run <code className="text-cyan-200">npm run seed:admin</code> in backend, then sign in here.
         </p>
       </Card>
     </AuthLayout>

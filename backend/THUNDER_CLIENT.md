@@ -1,14 +1,19 @@
-# SkillSphere API – Thunder Client Guide (Week 1)
+# SkillSphere API – Auth & RBAC Guide
 
 Base URL: `http://localhost:5000` (use your `PORT` from `backend/.env`)
 
+## Roles
+| Role | Register via UI/API | Access |
+|------|---------------------|--------|
+| `client` | Yes | Client features |
+| `freelancer` | Yes | Freelancer features |
+| `admin` | `npm run seed:admin` only | `/admin/*` routes |
+
 ## 1. Health Check
 - **GET** `/health`
-- No headers needed
 
-## 2. Register
+## 2. Register (client / freelancer only)
 - **POST** `/auth/register`
-- Body (JSON):
 ```json
 {
   "name": "John Client",
@@ -17,55 +22,43 @@ Base URL: `http://localhost:5000` (use your `PORT` from `backend/.env`)
   "role": "client"
 }
 ```
-- Role: `client` or `freelancer` only
-- Copy `token` from response
 
-## 3. Login
+## 3. Login (JWT)
 - **POST** `/auth/login`
-- Body (JSON):
+- If 2FA enabled → `{ requires2FA: true, tempToken }` then **POST** `/auth/verify-2fa`
 ```json
-{
-  "email": "john@example.com",
-  "password": "password123"
-}
+{ "tempToken": "...", "token": "123456" }
 ```
 
-## 4. Verify Email
+## 4. Google OAuth
+- Browser: **GET** `/auth/google?role=client` (or `freelancer`)
+- Callback redirects to frontend with `?token=JWT`
+- Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL`
+
+## 5. Email verification
 - **GET** `/auth/verify-email/:token`
-- Replace `:token` with token from registration email/DB
+- **POST** `/auth/resend-verification` (Bearer token)
 
-## 5. Get Current User (Protected)
-- **GET** `/auth/me` OR **GET** `/users/me`
+## 6. Password reset
+- **POST** `/auth/forgot-password` → `{ "email": "..." }`
+- **PUT** `/auth/reset-password/:token` → `{ "password": "newpass123" }`
+
+## 7. Two-Factor Authentication (2FA)
+- **POST** `/auth/2fa/setup` (Bearer) → QR code
+- **POST** `/auth/2fa/enable` → `{ "token": "123456" }`
+- **POST** `/auth/2fa/disable` → `{ "password": "...", "token": "123456" }`
+
+## 8. Protected user routes
+- **GET** `/auth/me` or **GET** `/users/me`
+- **PUT** `/users/profile` (requires verified email)
 - Header: `Authorization: Bearer YOUR_JWT_TOKEN`
 
-## 6. Update Profile (Protected)
-- **PUT** `/users/profile`
-- Header: `Authorization: Bearer YOUR_JWT_TOKEN`
-- Client body example:
-```json
-{
-  "name": "John Updated",
-  "phone": "9876543210",
-  "bio": "Looking for local freelancers",
-  "location": "Mumbai",
-  "companyName": "Tech Corp"
-}
-```
-- Freelancer body example:
-```json
-{
-  "name": "Jane Freelancer",
-  "bio": "React developer",
-  "location": "Delhi",
-  "hourlyRate": 50,
-  "skills": [
-    { "name": "React", "level": "expert" },
-    { "name": "Node.js", "level": "advanced" }
-  ]
-}
-```
-
-## 7. Admin Routes (admin role only)
+## 9. Admin (RBAC – admin role only)
 - **GET** `/admin/users`
 - **GET** `/admin/stats`
-- Header: `Authorization: Bearer ADMIN_JWT_TOKEN`
+
+## 10. Seed admin
+```bash
+cd backend && npm run seed:admin
+```
+Sign in at `/login` with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `.env`.

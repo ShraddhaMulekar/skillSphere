@@ -6,6 +6,10 @@ export const verifyEmail = async (req, res) => {
 
     const user = await UserModel.findOne({
       emailVerificationToken: token,
+      $or: [
+        { emailVerificationExpire: { $gt: Date.now() } },
+        { emailVerificationExpire: { $exists: false } },
+      ],
     });
 
     if (!user) {
@@ -16,6 +20,7 @@ export const verifyEmail = async (req, res) => {
 
     user.isVerified = true;
     user.emailVerificationToken = undefined;
+    user.emailVerificationExpire = undefined;
     await user.save();
 
     return res

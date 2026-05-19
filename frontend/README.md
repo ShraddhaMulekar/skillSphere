@@ -1,16 +1,36 @@
-# React + Vite
+# SkillSphere Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Auth features
 
-Currently, two official plugins are available:
+- **Roles:** Client, Freelancer (register), Admin (backend seed only)
+- **JWT** login / register with Redux persistence
+- **Google OAuth:** "Continue with Google" on login/register
+- **Email verification:** link from email → `/verify-email/:token`
+- **Password reset:** `/forgot-password` → email link → `/reset-password/:token`
+- **2FA:** Profile → Security → set up with authenticator app
+- **RBAC:** Admin panel at `/admin` (admin role only)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Setup
 
-## React Compiler
+```bash
+cp .env.example .env
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Ensure `VITE_API_URL` matches your backend (e.g. `http://localhost:5000`).
 
-## Expanding the ESLint configuration
+## Admin sign-in
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+cd ../backend
+npm run seed:admin
+```
+
+Sign in at `/login` with credentials from `backend/.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`).
+
+## Google OAuth
+
+1. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+2. Add authorized redirect URI: `http://localhost:5000/auth/google/callback`
+3. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `backend/.env`.

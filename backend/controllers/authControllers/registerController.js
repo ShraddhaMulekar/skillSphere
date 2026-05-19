@@ -2,11 +2,11 @@ import { UserModel } from "../../models/UserModel.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { sendEmail } from "../../utils/sendEmail.js";
-import { generateToken } from "../../utils/generateToken.js";
+import { PUBLIC_REGISTER_ROLES } from "../../constants/roles.js";
+import { sendAuthSuccess } from "../../utils/authResponse.js";
 
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 const SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUND) || 10;
-const ALLOWED_ROLES = ["client", "freelancer"];
 
 export const registerController = async (req, res) => {
   try {
@@ -18,14 +18,14 @@ export const registerController = async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
-    if (!ALLOWED_ROLES.includes(role)) {
+    if (!PUBLIC_REGISTER_ROLES.includes(role)) {
       return res.status(400).json({
         success: false,
         message: "Role must be client or freelancer",
       });
     }
 
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res
         .status(400)
@@ -37,18 +37,20 @@ export const registerController = async (req, res) => {
 
     const newUser = await UserModel.create({
       name,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
       role,
+      authProvider: "local",
       emailVerificationToken: verificationToken,
+      emailVerificationExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
     const verifyURL = `${clientUrl}/verify-email/${verificationToken}`;
-    const apiVerifyURL = `http://localhost:${process.env.PORT || 8080}/auth/verify-email/${verificationToken}`;
+    const apiVerifyURL = `http://localhost:${process.env.PORT || 5000}/auth/verify-email/${verificationToken}`;
 
     try {
       await sendEmail({
-        to: email,
+        to: newUser.email,
         subject: "Verify your SkillSphere account",
         html: `<h2>Hi ${name}!</h2>
                <p>Click below to verify your email:</p>
@@ -60,20 +62,12 @@ export const registerController = async (req, res) => {
       console.warn("Email send failed:", emailError.message);
     }
 
-    const token = generateToken(newUser._id, newUser.role);
-
-    return res.status(201).json({
-      success: true,
-      message: "Registration successful. Please verify your email.",
-      token,
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        isVerified: newUser.isVerified,
-      },
-    });
+    return sendAuthSuccess(
+      res,
+      newUser,
+      201,
+      "Registration successful. Please verify your email.",
+    );
   } catch (error) {
     return res.status(500).json({
       success: false,
