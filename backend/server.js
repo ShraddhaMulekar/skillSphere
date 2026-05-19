@@ -1,25 +1,47 @@
-import express from "express"
-import cors from "cors"
-import dotenv from 'dotenv'
-import helmet from "helmet"
-import { connectDB } from "./config/mongoDB.js"
-import { authRoutes } from "./routes/authRoutes.js"
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import helmet from "helmet";
+import { connectDB } from "./config/mongoDB.js";
+import { authRoutes } from "./routes/authRoutes.js";
+import { userRoutes } from "./routes/userRoutes.js";
+import { adminRoutes } from "./routes/adminRoutes.js";
 
-// Load env variables
-dotenv.config()
+dotenv.config();
 
-const app = express()
-const port = process.env.PORT || 8080
+const app = express();
+const port = process.env.PORT || 8080;
 
-// Middlewares
-app.use(helmet())
-app.use(express.json())
-app.use(cors())
+app.use(helmet());
+app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
-app.use("/auth", authRoutes)
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "SkillSphere API is running",
+    version: "1.0.0",
+  });
+});
 
-// Start server
-app.listen(port, async ()=>{
-    await connectDB()
-    console.log(`Server is running on port http://localhost:${port}`)
-})
+app.get("/health", (req, res) => {
+  res.json({ success: true, status: "ok" });
+});
+
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
+app.use("/admin", adminRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: "Route not found" });
+});
+
+app.listen(port, async () => {
+  await connectDB();
+  console.log(`Server is running on http://localhost:${port}`);
+});

@@ -1,10 +1,23 @@
 import mongoose from "mongoose";
 
+const skillSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    level: {
+      type: String,
+      enum: ["beginner", "intermediate", "advanced", "expert"],
+      default: "intermediate",
+    },
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: [true, "Name is required"],
+      trim: true,
     },
     email: {
       type: String,
@@ -27,10 +40,16 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    avator: {
+    avatar: {
       type: String,
       default: "",
     },
+    phone: { type: String, default: "" },
+    bio: { type: String, default: "", maxlength: 500 },
+    location: { type: String, default: "" },
+    companyName: { type: String, default: "" },
+    skills: [skillSchema],
+    hourlyRate: { type: Number, default: 0 },
     emailVerificationToken: String,
     passwordResetToken: String,
     passwordResetExpire: Date,
@@ -42,7 +61,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  },
+  }
 );
 
 export const UserModel = mongoose.model("user", userSchema);
