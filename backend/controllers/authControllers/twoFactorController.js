@@ -1,6 +1,6 @@
 import speakeasy from "speakeasy";
 import qrcode from "qrcode";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { UserModel } from "../../models/UserModel.js";
 import {
   generateTemp2FAToken,

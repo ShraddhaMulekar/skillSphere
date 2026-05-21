@@ -1,5 +1,5 @@
 import { UserModel } from "../../models/UserModel.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { sendAuthSuccess, toPublicUser } from "../../utils/authResponse.js";
 import { issue2FATempToken } from "./twoFactorController.js";
 
@@ -21,6 +21,13 @@ export const loginController = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid email" });
     }
 
+    if (user.isSuspended) {
+      return res.status(403).json({
+        success: false,
+        message: "This account has been suspended. Contact support.",
+      });
+    }
+
     if (user.authProvider === "google" && !user.password) {
       return res.status(401).json({
         success: false,
@@ -29,11 +36,11 @@ export const loginController = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res
         .status(401)
-        .json({ success: false, message: "Invalid password" });
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     if (user.twoFactorEnabled) {

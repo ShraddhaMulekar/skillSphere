@@ -1,19 +1,26 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../store/authSlice";
 import Button from "../ui/Button";
 
 const navItems = [
-  { to: "/dashboard", label: "Dashboard", icon: "🏠", short: "Home" },
-  { to: "/profile", label: "Profile", icon: "👤", short: "Profile" },
+  { to: "/dashboard", label: "Dashboard", icon: "Home", short: "Home" },
+  { to: "/gigs", label: "Marketplace", icon: "Gigs", short: "Gigs" },
+  { to: "/messages", label: "Messages", icon: "Chat", short: "Chat" },
+  { to: "/payments", label: "Payments", icon: "Pay", short: "Pay" },
+  { to: "/disputes", label: "Disputes", icon: "Case", short: "Cases" },
+  { to: "/notifications", label: "Notifications", icon: "Bell", short: "Alerts" },
+  { to: "/analytics", label: "Analytics", icon: "Chart", short: "Stats" },
+  { to: "/profile", label: "Profile", icon: "User", short: "Profile" },
 ];
+
+const mobileNavItems = navItems.slice(0, 4);
 
 export default function DashboardLayout() {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const roleColors = {
@@ -30,10 +37,6 @@ export default function DashboardLayout() {
   };
 
   const closeSidebar = () => setSidebarOpen(false);
-
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
 
   useEffect(() => {
     document.body.style.overflow = sidebarOpen ? "hidden" : "";
@@ -83,7 +86,9 @@ export default function DashboardLayout() {
               }`
             }
           >
-            <span>{item.icon}</span>
+            <span className="w-10 text-[10px] uppercase tracking-wide text-white/40">
+              {item.icon}
+            </span>
             {item.label}
           </NavLink>
         ))}
@@ -99,7 +104,10 @@ export default function DashboardLayout() {
               }`
             }
           >
-            <span>⚙️</span> Admin
+            <span className="w-10 text-[10px] uppercase tracking-wide text-amber-200/70">
+              Admin
+            </span>
+            Admin
           </NavLink>
         )}
       </nav>
@@ -177,7 +185,7 @@ export default function DashboardLayout() {
           </button>
           <div className="min-w-0 flex-1">
             <p className="text-white font-bold text-sm truncate">
-              Hi, {user?.name?.split(" ")[0]}! 👋
+              Hi, {user?.name?.split(" ")[0]}!
             </p>
             <p className="text-white/80 text-xs truncate capitalize">
               {user?.role}
@@ -190,7 +198,7 @@ export default function DashboardLayout() {
             className={`hidden lg:block bg-gradient-to-r ${gradient} px-6 xl:px-8 py-5 xl:py-6 shadow-lg`}
           >
             <h1 className="text-xl xl:text-2xl font-bold text-white">
-              Welcome back, {user?.name?.split(" ")[0]}! 👋
+              Welcome back, {user?.name?.split(" ")[0]}!
             </h1>
             <p className="text-white/80 text-sm mt-1">
               {user?.isVerified
@@ -206,7 +214,7 @@ export default function DashboardLayout() {
 
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-md border-t border-white/10 pb-[env(safe-area-inset-bottom)]">
           <div className="flex justify-around items-center py-2 px-1">
-            {navItems.map((item) => (
+            {mobileNavItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -216,7 +224,7 @@ export default function DashboardLayout() {
                   }`
                 }
               >
-                <span className="text-xl">{item.icon}</span>
+                <span className="text-[10px] uppercase">{item.icon}</span>
                 <span className="text-[10px] sm:text-xs font-medium">
                   {item.short}
                 </span>
@@ -227,7 +235,7 @@ export default function DashboardLayout() {
               onClick={() => setSidebarOpen(true)}
               className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl min-w-[4.5rem] text-white/50"
             >
-              <span className="text-xl">☰</span>
+              <span className="text-[10px] uppercase">Menu</span>
               <span className="text-[10px] sm:text-xs font-medium">Menu</span>
             </button>
           </div>

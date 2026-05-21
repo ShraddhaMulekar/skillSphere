@@ -8,6 +8,7 @@ import { configurePassport } from "./config/passport.js";
 import { authRoutes } from "./routes/authRoutes.js";
 import { userRoutes } from "./routes/userRoutes.js";
 import { adminRoutes } from "./routes/adminRoutes.js";
+import { marketplaceRoutes } from "./routes/marketplaceRoutes.js";
 
 dotenv.config();
 configurePassport();
@@ -40,6 +41,7 @@ app.get("/health", (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/admin", adminRoutes);
+app.use("/api", marketplaceRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: "Route not found" });

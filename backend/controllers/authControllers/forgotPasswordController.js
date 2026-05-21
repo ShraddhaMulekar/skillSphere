@@ -36,6 +36,7 @@ export const forgotPassword = async (req, res) => {
 
     const resetURL = `${clientUrl}/reset-password/${resetToken}`;
 
+    let emailSent = true;
     try {
       await sendEmail({
         to: user.email,
@@ -46,12 +47,17 @@ export const forgotPassword = async (req, res) => {
                <a href="${resetURL}">${resetURL}</a>`,
       });
     } catch (emailError) {
-      console.warn("Password reset email failed:", emailError.message);
+      emailSent = false;
+      console.error("Password reset email failed:", emailError.message);
     }
 
     return res.json({
       success: true,
-      message: "If that email exists, a reset link has been sent",
+      message: emailSent
+        ? "If that email exists, a reset link has been sent"
+        : "Reset email could not be sent. Use the reset link returned by the API.",
+      emailSent,
+      resetUrl: emailSent ? undefined : resetURL,
     });
   } catch (error) {
     return res.status(500).json({

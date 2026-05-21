@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { UserModel } from "../../models/UserModel.js";
 import { hashToken } from "../../utils/tokenUtils.js";
 import { sendAuthSuccess } from "../../utils/authResponse.js";

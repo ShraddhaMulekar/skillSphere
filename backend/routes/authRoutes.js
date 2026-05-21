@@ -26,6 +26,7 @@ authRoutes.post("/login", strictAuthLimiter, loginController);
 authRoutes.post("/forgot-password", strictAuthLimiter, forgotPassword);
 authRoutes.put("/reset-password/:token", strictAuthLimiter, resetPassword);
 authRoutes.post("/verify-2fa", strictAuthLimiter, verify2FALogin);
+authRoutes.post("/verify-email", verifyEmail);
 authRoutes.get("/verify-email/:token", verifyEmail);
 
 authRoutes.get("/google", googleAuth);

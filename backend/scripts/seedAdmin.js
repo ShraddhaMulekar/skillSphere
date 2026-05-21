@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { connectDB } from "../config/mongoDB.js";
 import { UserModel } from "../models/UserModel.js";
 import { ROLES } from "../constants/roles.js";

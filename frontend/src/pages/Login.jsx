@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
@@ -17,12 +17,11 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-
-  useEffect(() => {
-    if (searchParams.get("error") === "google_auth_failed") {
-      setError("Google sign-in failed. Please try again.");
-    }
-  }, [searchParams]);
+  const visibleError =
+    error ||
+    (searchParams.get("error") === "google_auth_failed"
+      ? "Google sign-in failed. Please try again."
+      : "");
 
   const mutation = useMutation({
     mutationFn: loginUser,
@@ -64,7 +63,7 @@ export default function Login() {
   return (
     <AuthLayout title="Welcome Back" subtitle="Sign in to your SkillSphere account">
       <Card>
-        <Alert type="error" message={error} />
+        <Alert type="error" message={visibleError} />
         <form onSubmit={handleSubmit}>
           <Input
             label="Email"

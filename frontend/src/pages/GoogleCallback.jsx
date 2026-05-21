@@ -10,13 +10,10 @@ export default function GoogleCallback() {
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const token = searchParams.get("token");
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    if (!token) {
-      setError("Google sign-in failed. No token received.");
-      return;
-    }
+    if (!token) return;
 
     localStorage.setItem("token", token);
 
@@ -28,12 +25,14 @@ export default function GoogleCallback() {
       .catch(() => {
         setError("Could not load your account. Try signing in again.");
       });
-  }, [searchParams, dispatch, navigate]);
+  }, [token, dispatch, navigate]);
 
-  if (error) {
+  const visibleError = error || (!token ? "Google sign-in failed. No token received." : "");
+
+  if (visibleError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white p-6 text-center">
-        <p className="text-red-300 mb-4">{error}</p>
+        <p className="text-red-300 mb-4">{visibleError}</p>
         <a href="/login" className="text-cyan-300 underline">
           Back to Sign In
         </a>

@@ -1,0 +1,207 @@
+
+========================================
+[2026-05-21T07:57:19.623Z] EMAIL SENT
+To: testuser@example.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/abcdef123456
+  - http://localhost:5000/auth/verify-email/abcdef123456
+---------------------------
+Body:
+Hi Test User! 
+            Click below to verify your email: 
+            Verify on App 
+            Or use API link for Thunder Client: 
+            http://localhost:5000/auth/verify-email/abcdef123456
+========================================
+
+
+========================================
+[2026-05-21T07:59:39.790Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/02fd0e05555e83bb0e38b8fff37161dfd42591c29e4b42fb7c4233550c0479bf
+---------------------------
+Body:
+Hi shyama! 
+                Click below to verify your email: 
+                Verify Email
+========================================
+
+
+========================================
+[2026-05-21T08:01:25.960Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/4a4688fbb0a6cad30e5ee0ab423b0e486345141c207a64cd03e9cf07c71db376
+  - http://localhost:5000/auth/verify-email/4a4688fbb0a6cad30e5ee0ab423b0e486345141c207a64cd03e9cf07c71db376
+---------------------------
+Body:
+Hi shyam! 
+                Click below to verify your email: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/4a4688fbb0a6cad30e5ee0ab423b0e486345141c207a64cd03e9cf07c71db376
+========================================
+
+
+========================================
+[2026-05-21T08:03:01.105Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/dc94b5016e0d24a94c9307ac5186158765a38f542d349a0c607972e67706fcfa
+---------------------------
+Body:
+Hi shyam! 
+                Click below to verify your email: 
+                Verify Email
+========================================
+
+
+========================================
+[2026-05-21T08:04:54.155Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/9d9704c08fe27fe1b9869d757fa324228f3084b859ab3cad0f09b197bc6ceb82
+---------------------------
+Body:
+Hi shyam! 
+                Click below to verify your email: 
+                Verify Email
+========================================
+
+
+========================================
+[2026-05-21T08:05:20.267Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/99df7a3e21e5ca281b33efff3397774ceb5de22fa672a13e8c7bfe3dc5d64cf4
+---------------------------
+Body:
+Hi shyam! 
+                Click below to verify your email: 
+                Verify Email
+========================================
+
+
+========================================
+[2026-05-21T08:05:40.747Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/20944c0c1bad8ef3cab1500f437958a6445ce023f6cd01a8b785025f84cd676c
+---------------------------
+Body:
+Hi shyam! 
+                Click below to verify your email: 
+                Verify Email
+========================================
+
+
+========================================
+[2026-05-21T09:24:14.682Z] EMAIL SENT
+To: shraddha150198@gmail.com
+Subject: Reset your SkillSphere password
+Links Found:
+  - http://localhost:5173/reset-password/97d4fbedd26e434495aecd834e7a89404b75af23f6ec273baf04f9ea69e72b1a
+---------------------------
+Body:
+Password reset 
+                Hi shraddha, 
+                Click the link below to reset your password (expires in 10 minutes): 
+                http://localhost:5173/reset-password/97d4fbedd26e434495aecd834e7a89404b75af23f6ec273baf04f9ea69e72b1a
+========================================
+
+
+========================================
+[2026-05-21T10:02:04.675Z] EMAIL SENT
+To: shraddhaachs@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/7cc5f12b723d2302d2808be71861753b884fd21114bc2284a8f56c517e1ca092
+  - http://localhost:5000/auth/verify-email/7cc5f12b723d2302d2808be71861753b884fd21114bc2284a8f56c517e1ca092
+---------------------------
+Body:
+Hi shraddha! 
+                Click below to verify your email: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/7cc5f12b723d2302d2808be71861753b884fd21114bc2284a8f56c517e1ca092
+========================================
+
+
+========================================
+[2026-05-21T10:18:55.801Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/bd319cb8cdde29d537c723234149395e3997df9ff37478ced31fd7a3b7bb84d1
+  - http://localhost:5000/auth/verify-email/bd319cb8cdde29d537c723234149395e3997df9ff37478ced31fd7a3b7bb84d1
+---------------------------
+Body:
+Hi shyama! 
+                Click below to verify your email: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/bd319cb8cdde29d537c723234149395e3997df9ff37478ced31fd7a3b7bb84d1
+========================================
+
+
+========================================
+[2026-05-21T10:21:49.233Z] EMAIL SENT
+To: test_verification_code@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/b5f65c308e0cf50a07a5d7ca916989fb7e503fac6da71e9ed5ceeff47e962019
+  - http://localhost:5000/auth/verify-email/b5f65c308e0cf50a07a5d7ca916989fb7e503fac6da71e9ed5ceeff47e962019
+---------------------------
+Body:
+Hi Test Code User! 
+                Your 6-digit verification code is:  419057  
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/b5f65c308e0cf50a07a5d7ca916989fb7e503fac6da71e9ed5ceeff47e962019
+========================================
+
+
+========================================
+[2026-05-21T10:23:18.271Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/80c4194a1fa09488109e2435b5858ecf6955e24cb8e4e12b724030d73446ea87
+  - http://localhost:5000/auth/verify-email/80c4194a1fa09488109e2435b5858ecf6955e24cb8e4e12b724030d73446ea87
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is:  697389  
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/80c4194a1fa09488109e2435b5858ecf6955e24cb8e4e12b724030d73446ea87
+========================================
+
+
+========================================
+[2026-05-21T10:28:41.710Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/715e40606b36a92fc76828d6f5febc47348204e249f6ed300b0bd74d82dc2af6
+  - http://localhost:5000/auth/verify-email/715e40606b36a92fc76828d6f5febc47348204e249f6ed300b0bd74d82dc2af6
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is:  340695  
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/715e40606b36a92fc76828d6f5febc47348204e249f6ed300b0bd74d82dc2af6
+========================================
+

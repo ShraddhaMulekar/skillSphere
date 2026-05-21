@@ -27,6 +27,13 @@ export const protect = async (req, res, next) => {
         .json({ success: false, message: "User no longer exists" });
     }
 
+    if (user.isSuspended) {
+      return res.status(403).json({
+        success: false,
+        message: "This account has been suspended. Contact support.",
+      });
+    }
+
     req.user = user;
     next();
   } catch (error) {

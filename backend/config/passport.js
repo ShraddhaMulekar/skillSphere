@@ -52,6 +52,10 @@ export const configurePassport = () => {
           }).select("+password");
 
           if (user) {
+            if (user.isSuspended) {
+              return done(new Error("Account suspended"), null);
+            }
+
             if (!user.googleId) {
               user.googleId = profile.id;
               user.authProvider = "google";

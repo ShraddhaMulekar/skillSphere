@@ -11,6 +11,15 @@ import GoogleCallback from "../pages/GoogleCallback";
 import Dashboard from "../pages/Dashboard";
 import Profile from "../pages/Profile";
 import Admin from "../pages/Admin";
+import NotFound from "../pages/NotFound";
+import Analytics from "../pages/Analytics";
+import CreateGig from "../pages/CreateGig";
+import Disputes from "../pages/Disputes";
+import GigDetail from "../pages/GigDetail";
+import Marketplace from "../pages/Marketplace";
+import Messages from "../pages/Messages";
+import Notifications from "../pages/Notifications";
+import Payments from "../pages/Payments";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 
@@ -56,6 +65,21 @@ export default function AppRoutes() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/gigs" element={<Marketplace />} />
+          <Route
+            path="/gigs/new"
+            element={
+              <ProtectedRoute roles={["client", "admin"]} requireVerified>
+                <CreateGig />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/gigs/:id" element={<GigDetail />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/disputes" element={<Disputes />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route
             path="/admin"
             element={
@@ -66,7 +90,7 @@ export default function AppRoutes() {
           />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

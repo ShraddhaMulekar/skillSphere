@@ -1,4 +1,5 @@
 import { UserModel } from "../../models/UserModel.js";
+import { toPublicUser } from "../../utils/authResponse.js";
 
 export const updateProfile = async (req, res) => {
   try {
@@ -12,6 +13,12 @@ export const updateProfile = async (req, res) => {
       companyName,
       skills,
       hourlyRate,
+      milestoneRate,
+      portfolio,
+      resume,
+      certifications,
+      experience,
+      availability,
     } = req.body;
 
     if (name) user.name = name;
@@ -27,6 +34,12 @@ export const updateProfile = async (req, res) => {
     if (user.role === "freelancer") {
       if (skills !== undefined) user.skills = skills;
       if (hourlyRate !== undefined) user.hourlyRate = hourlyRate;
+      if (milestoneRate !== undefined) user.milestoneRate = milestoneRate;
+      if (portfolio !== undefined) user.portfolio = portfolio;
+      if (resume !== undefined) user.resume = resume;
+      if (certifications !== undefined) user.certifications = certifications;
+      if (experience !== undefined) user.experience = experience;
+      if (availability !== undefined) user.availability = availability;
     }
 
     await user.save();
@@ -34,20 +47,7 @@ export const updateProfile = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isVerified: user.isVerified,
-        avatar: user.avatar,
-        phone: user.phone,
-        bio: user.bio,
-        location: user.location,
-        companyName: user.companyName,
-        skills: user.skills,
-        hourlyRate: user.hourlyRate,
-      },
+      user: toPublicUser(user),
     });
   } catch (error) {
     return res.status(500).json({

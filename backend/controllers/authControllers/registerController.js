@@ -1,9 +1,10 @@
 import { UserModel } from "../../models/UserModel.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendEmail } from "../../utils/sendEmail.js";
 import { PUBLIC_REGISTER_ROLES } from "../../constants/roles.js";
 import { sendAuthSuccess } from "../../utils/authResponse.js";
+import { getEmailValidationError } from "../../utils/emailValidator.js";
 
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 const SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUND) || 10;
@@ -16,6 +17,14 @@ export const registerController = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
+    }
+
+    const emailValidationError = getEmailValidationError(email);
+    if (emailValidationError) {
+      return res.status(400).json({
+        success: false,
+        message: emailValidationError,
+      });
     }
 
     if (!PUBLIC_REGISTER_ROLES.includes(role)) {
@@ -48,25 +57,41 @@ export const registerController = async (req, res) => {
     const verifyURL = `${clientUrl}/verify-email/${verificationToken}`;
     const apiVerifyURL = `http://localhost:${process.env.PORT || 5000}/auth/verify-email/${verificationToken}`;
 
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    newUser.verificationCode = verificationCode;
+    newUser.verificationCodeExpire = new Date(Date.now() + 10 * 60 * 1000);
+    await newUser.save();
+    
+    let emailSent = true;
     try {
       await sendEmail({
         to: newUser.email,
         subject: "Verify your SkillSphere account",
         html: `<h2>Hi ${name}!</h2>
-               <p>Click below to verify your email:</p>
+               <p>Your 6-digit verification code is: <strong style="font-size: 1.25rem; letter-spacing: 2px; color: #6366f1;">${verificationCode}</strong></p>
+               <p>Click below to verify your email automatically:</p>
                <a href="${verifyURL}">Verify on App</a>
                <p>Or use API link for Thunder Client:</p>
                <a href="${apiVerifyURL}">${apiVerifyURL}</a>`,
       });
     } catch (emailError) {
-      console.warn("Email send failed:", emailError.message);
+      emailSent = false;
+      console.warn("Verification email failed during registration:", emailError.message);
     }
 
     return sendAuthSuccess(
       res,
       newUser,
       201,
-      "Registration successful. Please verify your email.",
+      emailSent
+        ? "Registration successful. Please verify your email."
+        : "Registration successful. Email could not be sent, so use the verification link returned by the API.",
+      {
+        emailSent,
+        verificationUrl: verifyURL,
+        verificationCode: newUser.verificationCode,
+        apiVerificationUrl: apiVerifyURL,
+      },
     );
   } catch (error) {
     return res.status(500).json({

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import AuthLayout from "../components/layout/AuthLayout";
@@ -26,8 +26,8 @@ export default function Register() {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [verificationUrl, setVerificationUrl] = useState("");
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: (data) => registerUser(data),
@@ -41,7 +41,7 @@ export default function Register() {
       setSuccess(
         res.data.message || "Account created! Check your email to verify.",
       );
-      setTimeout(() => navigate("/dashboard"), 1500);
+      setVerificationUrl(res.data.verificationUrl || res.data.apiVerificationUrl || "");
     },
     onError: (err) => {
       if (!err.response) {
@@ -61,6 +61,8 @@ export default function Register() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
+    setSuccess("");
+    setVerificationUrl("");
   };
 
   const handleSubmit = (e) => {
@@ -76,6 +78,22 @@ export default function Register() {
       <Card>
         <Alert type="error" message={error} />
         <Alert type="success" message={success} />
+        {success && (
+          <div className="mb-4 rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-3 text-sm text-cyan-100">
+            <p className="font-semibold">Have your verification code?</p>
+            <Link to="/verify-email" className="mt-1 block text-cyan-200 underline font-medium">
+              Click here to enter your 6-digit verification code
+            </Link>
+          </div>
+        )}
+        {verificationUrl && (
+          <div className="mb-4 rounded-xl border border-amber-400/30 bg-amber-500/10 p-3 text-sm text-amber-100">
+            <p className="font-semibold">Manual verification link</p>
+            <a href={verificationUrl} className="mt-1 block break-all text-cyan-200 underline">
+              {verificationUrl}
+            </a>
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <Input
             label="Full Name"
