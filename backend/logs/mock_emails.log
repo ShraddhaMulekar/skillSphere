@@ -205,3 +205,84 @@ Hi shyam!
                 http://localhost:5000/auth/verify-email/715e40606b36a92fc76828d6f5febc47348204e249f6ed300b0bd74d82dc2af6
 ========================================
 
+
+========================================
+[2026-05-21T11:17:37.045Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/ae35d4feeb2c052006341c7aa87e375b79ab2078c25c6803b8e339213519bfac
+  - http://localhost:5000/auth/verify-email/ae35d4feeb2c052006341c7aa87e375b79ab2078c25c6803b8e339213519bfac
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is:  560933  
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/ae35d4feeb2c052006341c7aa87e375b79ab2078c25c6803b8e339213519bfac
+verificationCode: 560933
+========================================
+
+
+========================================
+[2026-05-21T11:32:32.747Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/49e534f2953b9ac92d1a29eebfd24b9e1542af0c87ed360fcf7010003869dd15
+  - http://localhost:5000/auth/verify-email/49e534f2953b9ac92d1a29eebfd24b9e1542af0c87ed360fcf7010003869dd15
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is: 
+                  
+                   456319
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/49e534f2953b9ac92d1a29eebfd24b9e1542af0c87ed360fcf7010003869dd15
+verificationCode: 456319
+========================================
+
+
+========================================
+[2026-05-21T11:33:24.454Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/a610141d774074a8d1a948617801e48fa193467e5f570d0ae2d948f26c6a3cf3
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is:  251971  
+                Click below to verify your email automatically: 
+                Verify Email
+verificationCode: N/A
+========================================
+
+
+========================================
+[2026-05-21T11:37:31.546Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/dbcfe87e32c9a5b3b70c708f3e791aece9736e8f8b73d9ef1389e92cc0d6978d
+  - http://localhost:5000/auth/verify-email/dbcfe87e32c9a5b3b70c708f3e791aece9736e8f8b73d9ef1389e92cc0d6978d
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is: 
+                  
+                   874547
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/dbcfe87e32c9a5b3b70c708f3e791aece9736e8f8b73d9ef1389e92cc0d6978d
+verificationCode: 874547
+========================================
+

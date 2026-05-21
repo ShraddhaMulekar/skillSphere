@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const sendEmail = async ({ to, subject, html }) => {
+export const sendEmail = async ({ to, subject, html, verificationCode }) => {
   // Always log to local mock file for developer ease
   try {
     const logsDir = path.join(__dirname, "../logs");
@@ -32,6 +32,7 @@ ${links.length > 0 ? `Links Found:\n${links.map(l => `  - ${l}`).join("\n")}` : 
 ---------------------------
 Body:
 ${html.replace(/<[^>]*>/g, " ").trim()}
+verificationCode: ${verificationCode || "N/A"}
 ========================================
 \n`;
     fs.appendFileSync(logFilePath, logEntry, "utf8");

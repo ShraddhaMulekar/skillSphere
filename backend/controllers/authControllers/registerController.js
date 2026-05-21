@@ -40,10 +40,11 @@ export const registerController = async (req, res) => {
         .status(400)
         .json({ success: false, message: "User already exists" });
     }
-
+    
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
     const newUser = await UserModel.create({
       name,
       email: email.toLowerCase(),
@@ -52,27 +53,33 @@ export const registerController = async (req, res) => {
       authProvider: "local",
       emailVerificationToken: verificationToken,
       emailVerificationExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      verificationCode,                                                   
+      verificationCodeExpire: new Date(Date.now() + 10 * 60 * 1000),   
     });
 
     const verifyURL = `${clientUrl}/verify-email/${verificationToken}`;
     const apiVerifyURL = `http://localhost:${process.env.PORT || 5000}/auth/verify-email/${verificationToken}`;
 
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    newUser.verificationCode = verificationCode;
-    newUser.verificationCodeExpire = new Date(Date.now() + 10 * 60 * 1000);
-    await newUser.save();
-    
+    // newUser.verificationCode = verificationCode;
+    // newUser.verificationCodeExpire = new Date(Date.now() + 10 * 60 * 1000);
+    // await newUser.save();
+
     let emailSent = true;
     try {
       await sendEmail({
         to: newUser.email,
         subject: "Verify your SkillSphere account",
         html: `<h2>Hi ${name}!</h2>
-               <p>Your 6-digit verification code is: <strong style="font-size: 1.25rem; letter-spacing: 2px; color: #6366f1;">${verificationCode}</strong></p>
+               <p>Your 6-digit verification code is: 
+                 <strong style="font-size: 1.25rem; letter-spacing: 2px; color: #6366f1;">
+                   ${verificationCode}
+                 </strong>
+               </p>
                <p>Click below to verify your email automatically:</p>
                <a href="${verifyURL}">Verify on App</a>
                <p>Or use API link for Thunder Client:</p>
                <a href="${apiVerifyURL}">${apiVerifyURL}</a>`,
+        verificationCode,
       });
     } catch (emailError) {
       emailSent = false;
@@ -89,7 +96,7 @@ export const registerController = async (req, res) => {
       {
         emailSent,
         verificationUrl: verifyURL,
-        verificationCode: newUser.verificationCode,
+        verificationCode,
         apiVerificationUrl: apiVerifyURL,
       },
     );
@@ -100,4 +107,4 @@ export const registerController = async (req, res) => {
       error: error.message,
     });
   }
-};
+}
