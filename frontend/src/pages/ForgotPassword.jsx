@@ -1,73 +1,219 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+// src/pages/ForgotPassword.jsx
+import { useState, useEffect } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import AuthLayout from "../components/layout/AuthLayout";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Alert from "../components/ui/Alert";
-import { forgotPassword } from "../api/authApi";
+import { forgotPassword, resetPassword } from "../api/authApi";
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
+  const { token: rawToken } = useParams();
+  const token = rawToken ? decodeURIComponent(rawToken) : "";
+  const [directToken, setDirectToken] = useState("");
+  // Mutation to obtain a reset token without sending email link
+  const getTokenMutation = useMutation({
+    mutationFn: () => forgotPassword(email),
+    onSuccess: (res) => {
+      if (res.data.resetToken) {
+        setDirectToken(res.data.resetToken);
+        setShowResetForm(true);
+      } else {
+        setError("Unable to obtain reset token");
+      }
+    },
+    onError: (err) => {
+      setError(err.response?.data?.message || "Failed to get reset token");
+    },
+  });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [resetUrl, setResetUrl] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [showResetForm, setShowResetForm] = useState(false);
 
-  const mutation = useMutation({
+  // If token is present in URL, automatically show reset form
+  useEffect(() => {
+    if (token) setShowResetForm(true);
+  }, [token]);
+
+  // Send reset‑link flow
+  const sendLinkMutation = useMutation({
     mutationFn: () => forgotPassword(email),
     onSuccess: (res) => {
       setMessage(res.data.message || "Check your email for a reset link.");
       setError("");
-      setResetUrl(res.data.resetUrl || "");
+      // If a reset token is returned, navigate to the reset password route
+      if (res.data.resetToken) {
+        navigate(`/reset-password/${encodeURIComponent(res.data.resetToken)}`);
+        return; // navigation will handle reset form
+      }
+      // If verificationCode is provided (legacy), set it
+      if (res.data.verificationCode) {
+        setVerificationCode(res.data.verificationCode);
+        setShowResetForm(true);
+      }
     },
     onError: (err) => {
       setError(err.response?.data?.message || "Request failed");
-      setResetUrl("");
+      setMessage("");
     },
   });
 
+  const [hideAll, setHideAll] = useState(false);
+
+  // Reset password flow using URL token
+  const resetPasswordMutation = useMutation({
+    mutationFn: () => resetPassword(directToken || token, newPass),
+    onSuccess: (res) => {
+      setMessage("Password reset successful. You can now log in.");
+      setError("");
+      setEmail("");
+      setNewPass("");
+      setConfirmPass("");
+      setHideAll(false);
+    },
+    onError: (err) => {
+      const msg = err.response?.data?.message || "Reset failed";
+      setError(msg);
+      if (msg.includes("Invalid or expired reset token")) {
+        setHideAll(true);
+        setShowResetForm(false);
+        setVerificationCode(""); // clear stale token
+      }
+    },
+  });
+
+  // Handlers
+  const handleSendLink = (e) => {
+    e.preventDefault();
+    sendLinkMutation.mutate();
+  };
+
+  const handleResetPassword = (e) => {
+    e.preventDefault();
+    if (newPass !== confirmPass) {
+      setError("Passwords do not match");
+      return;
+    }
+    if (newPass.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    setError("");
+    resetPasswordMutation.mutate();
+  };
+
+  // Reset UI after invalid/expired token
+  const resetInvalidToken = () => {
+    setHideAll(false);
+    setShowResetForm(false);
+    setVerificationCode("");
+    setError("");
+    setMessage("");
+    setEmail("");
+  };
   return (
     <AuthLayout
       title="Forgot Password"
-      subtitle="We'll email you a reset link"
+      subtitle="Enter your email to receive a reset code."
     >
       <Card>
         <Alert type="error" message={error} />
         <Alert type="success" message={message} />
-        {resetUrl && (
-          <div className="mb-4 rounded-xl border border-amber-400/30 bg-amber-500/10 p-3 text-sm text-amber-100">
-            <p className="font-semibold">Manual reset link</p>
-            <a href={resetUrl} className="mt-1 block break-all text-cyan-200 underline">
-              {resetUrl}
-            </a>
+
+        {!hideAll && (
+          <>
+            {/* Send Reset Link form */}
+            <form onSubmit={handleSendLink} className="mb-6">
+              <Input
+                label="Email"
+                type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+              />
+              <Button
+                type="submit"
+                className="w-full mt-2"
+                disabled={sendLinkMutation.isPending}
+              >
+                {sendLinkMutation.isPending ? "Sending..." : "Send Reset Link"}
+              </Button>
+            </form>
+            <Button
+              type="button"
+              className="text-cyan-300 underline mt-2"
+              onClick={() => {
+                // If we already have a token (e.g., from URL), just show the form
+                if (token) {
+                  setShowResetForm(true);
+                } else {
+                  // Otherwise fetch a token via forgotPassword API
+                  getTokenMutation.mutate();
+                }
+              }}
+            >
+              Reset Password
+            </Button>
+          </>
+        )}
+        {hideAll && (
+          <div className="text-center mt-4">
+            <p className="text-red-500 mb-2">{error}</p>
+            <Button
+              type="button"
+              className="bg-cyan-600 hover:bg-cyan-700 text-white"
+              onClick={resetInvalidToken}
+            >
+              Try Again
+            </Button>
           </div>
         )}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            mutation.mutate();
-          }}
-        >
-          <Input
-            label="Email"
-            type="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            required
-          />
-          <Button
-            type="submit"
-            className="w-full mt-2"
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? "Sending..." : "Send Reset Link"}
-          </Button>
-        </form>
+
+        {/* Reset Password form */}
+        {showResetForm && !hideAll && (
+          <form onSubmit={handleResetPassword} className="mt-4">
+            <Input
+              label="New Password"
+              type="password"
+              name="newPass"
+              value={newPass}
+              onChange={(e) => setNewPass(e.target.value)}
+              placeholder="Min 6 characters"
+              required
+            />
+            <Input
+              label="Confirm Password"
+              type="password"
+              name="confirmPass"
+              value={confirmPass}
+              onChange={(e) => setConfirmPass(e.target.value)}
+              placeholder="Repeat password"
+              required
+            />
+            <Button
+              type="submit"
+              className="w-full mt-2"
+              disabled={resetPasswordMutation.isPending}
+            >
+              {resetPasswordMutation.isPending
+                ? "Resetting..."
+                : "Reset Password"}
+            </Button>
+          </form>
+        )}
+
         <p className="text-center text-white/70 mt-6 text-sm">
-          <Link to="/login" className="text-cyan-300 hover:underline font-medium">
+          <Link
+            to="/login"
+            className="text-cyan-300 hover:underline font-medium"
+          >
             Back to Sign In
           </Link>
         </p>

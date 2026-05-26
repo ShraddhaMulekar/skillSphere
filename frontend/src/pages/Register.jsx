@@ -10,6 +10,7 @@ import Card from "../components/ui/Card";
 import Alert from "../components/ui/Alert";
 import { registerUser } from "../api/authApi";
 import { setCredentials } from "../store/authSlice";
+import { useNavigate } from "react-router-dom";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 
 const roleOptions = [
@@ -29,34 +30,24 @@ export default function Register() {
   const [verificationUrl, setVerificationUrl] = useState("");
   const dispatch = useDispatch();
 
+  const navigate = useNavigate();
   const mutation = useMutation({
     mutationFn: (data) => registerUser(data),
     onSuccess: (res) => {
-      const { token, user } = res.data;
+      const { token, user } = res.data || {};
       if (!token || !user) {
         setError("Invalid response from server");
         return;
       }
       dispatch(setCredentials({ token, user }));
-      setSuccess(
-        res.data.message || "Account created! Check your email to verify.",
-      );
-      setVerificationUrl(res.data.verificationUrl || res.data.apiVerificationUrl || "");
+      setSuccess(res.data.message || "Account created! Check your email to verify.");
+      if (res.data.verificationUrl) setVerificationUrl(res.data.verificationUrl);
     },
     onError: (err) => {
-      if (!err.response) {
-        setError(
-          "Cannot reach server. Start backend (npm start) and check VITE_API_URL matches its PORT.",
-        );
-        return;
-      }
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Registration failed";
+      const msg = err?.response?.data?.message || err?.response?.data?.error || "Registration failed";
       setError(msg);
     },
-  });
+  })
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -131,9 +122,9 @@ export default function Register() {
           <Button
             type="submit"
             className="w-full mt-2"
-            disabled={mutation.isPending}
+            disabled={mutation.isLoading}
           >
-            {mutation.isPending ? "Creating account..." : "Create Account"}
+            {mutation.isLoading ? "Creating account..." : "Create Account"}
           </Button>
         </form>
 

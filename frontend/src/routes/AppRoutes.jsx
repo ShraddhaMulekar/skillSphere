@@ -5,7 +5,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import VerifyEmail from "../pages/VerifyEmail";
 import ForgotPassword from "../pages/ForgotPassword";
-import ResetPassword from "../pages/ResetPassword";
+// ResetPassword handled by ForgotPassword component
 import TwoFactorLogin from "../pages/TwoFactorLogin";
 import GoogleCallback from "../pages/GoogleCallback";
 import Dashboard from "../pages/Dashboard";
@@ -52,7 +52,7 @@ export default function AppRoutes() {
           }
         />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/reset-password/:token" element={<ForgotPassword />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
 

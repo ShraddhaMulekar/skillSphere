@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import AuthLayout from "../components/layout/AuthLayout";
@@ -18,6 +18,7 @@ export default function VerifyEmail() {
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   // Prefill email from logged-in user if available
   useEffect(() => {
@@ -32,6 +33,7 @@ export default function VerifyEmail() {
     onSuccess: (res) => {
       setMessage(res.data.message || "Email verified successfully!");
       setError("");
+      navigate("/dashboard"); // go to dashboard after verification
     },
     onError: (err) => {
       setError(err.response?.data?.message || "Verification failed");
@@ -46,6 +48,7 @@ export default function VerifyEmail() {
       setMessage(res.data.message || "Email verified successfully!");
       setError("");
       setCode("");
+      navigate("/dashboard"); // go to dashboard after manual verification
     },
     onError: (err) => {
       setError(err.response?.data?.message || "Verification failed");
@@ -98,19 +101,7 @@ export default function VerifyEmail() {
             
             {!codeMutation.isSuccess && (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <Input
-                  label="Email Address"
-                  type="email"
-                  name="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setError("");
-                    setMessage("");
-                  }}
-                  placeholder="you@example.com"
-                  required
-                />
+
                 
                 <Input
                   label="6-Digit Verification Code"

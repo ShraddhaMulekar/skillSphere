@@ -14,7 +14,7 @@ export const getMe = () => api.get("/auth/me");
 export const forgotPassword = (email) =>
   api.post("/auth/forgot-password", { email });
 export const resetPassword = (token, password) =>
-  api.put(`/auth/reset-password/${token}`, { password });
+  api.put(`/auth/reset-password/${encodeURIComponent(token)}`, { password });
 export const resendVerification = () => api.post("/auth/resend-verification");
 export const setup2FA = () => api.post("/auth/2fa/setup");
 export const enable2FA = (token) => api.post("/auth/2fa/enable", { token });

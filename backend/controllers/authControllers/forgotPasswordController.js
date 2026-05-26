@@ -34,7 +34,8 @@ export const forgotPassword = async (req, res) => {
     user.passwordResetExpire = new Date(Date.now() + RESET_EXPIRE_MS);
     await user.save({ validateBeforeSave: false });
 
-    const resetURL = `${clientUrl}/reset-password/${resetToken}`;
+    const encodedToken = encodeURIComponent(resetToken);
+  const resetURL = `${clientUrl}/reset-password/${encodedToken}`;
 
     let emailSent = true;
     try {
@@ -58,6 +59,7 @@ export const forgotPassword = async (req, res) => {
         : "Reset email could not be sent. Use the reset link returned by the API.",
       emailSent,
       resetUrl: emailSent ? undefined : resetURL,
+      resetToken: emailSent ? resetToken : resetToken,
     });
   } catch (error) {
     return res.status(500).json({
