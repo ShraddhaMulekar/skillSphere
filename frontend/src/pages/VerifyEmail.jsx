@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import AuthLayout from "../components/layout/AuthLayout";
 import Card from "../components/ui/Card";
 import Loader from "../components/ui/Loader";
@@ -9,31 +9,39 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Alert from "../components/ui/Alert";
 import { verifyEmail, verifyEmailWithCode } from "../api/authApi";
+import { setCredentials } from "../store/authSlice";
 
 export default function VerifyEmail() {
   const { token } = useParams();
   const authUser = useSelector((state) => state.auth.user);
-  
+  const location = useLocation();  
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Prefill email from logged-in user if available
+  // Prefill email from logged-in user or from navigation state (after registration)
   useEffect(() => {
     if (authUser?.email) {
       setEmail(authUser.email);
+    } else if (location.state?.email) {
+      setEmail(location.state.email);
     }
-  }, [authUser]);
+  }, [authUser, location.state]);
 
   // Token Auto-Verification Mutation (GET)
   const tokenMutation = useMutation({
     mutationFn: () => verifyEmail(token),
     onSuccess: (res) => {
+      const { token, user } = res.data || {};
+      if (token && user) {
+        dispatch(setCredentials({ token, user }));
+      }
       setMessage(res.data.message || "Email verified successfully!");
       setError("");
-      navigate("/dashboard"); // go to dashboard after verification
+      navigate("/dashboard");
     },
     onError: (err) => {
       setError(err.response?.data?.message || "Verification failed");
@@ -45,10 +53,14 @@ export default function VerifyEmail() {
   const codeMutation = useMutation({
     mutationFn: (data) => verifyEmailWithCode(data),
     onSuccess: (res) => {
+      const { token, user } = res.data || {};
+      if (token && user) {
+        dispatch(setCredentials({ token, user }));
+      }
       setMessage(res.data.message || "Email verified successfully!");
       setError("");
       setCode("");
-      navigate("/dashboard"); // go to dashboard after manual verification
+      navigate("/dashboard");
     },
     onError: (err) => {
       setError(err.response?.data?.message || "Verification failed");

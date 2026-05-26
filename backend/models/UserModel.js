@@ -108,8 +108,10 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("validate", async function () {
-  if (this.authProvider === "local" && !this.password && !this.googleId) {
-    this.invalidate("password", "Password is required for local accounts");
+  if (this.isNew || this.isModified("password")) {
+    if (this.authProvider === "local" && !this.password && !this.googleId) {
+      this.invalidate("password", "Password is required for local accounts");
+    }
   }
 });
 

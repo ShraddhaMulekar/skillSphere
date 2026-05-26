@@ -28,20 +28,13 @@ export default function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [verificationUrl, setVerificationUrl] = useState("");
-  const dispatch = useDispatch();
 
   const navigate = useNavigate();
   const mutation = useMutation({
     mutationFn: (data) => registerUser(data),
     onSuccess: (res) => {
-      const { token, user } = res.data || {};
-      if (!token || !user) {
-        setError("Invalid response from server");
-        return;
-      }
-      dispatch(setCredentials({ token, user }));
-      setSuccess(res.data.message || "Account created! Check your email to verify.");
-      if (res.data.verificationUrl) setVerificationUrl(res.data.verificationUrl);
+      // Navigate to verification page (manual entry) passing email via location state
+      navigate("/verify-email", { state: { email: res.data.user.email } });
     },
     onError: (err) => {
       const msg = err?.response?.data?.message || err?.response?.data?.error || "Registration failed";

@@ -54,6 +54,7 @@ export default function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ForgotPassword />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
         <Route
