@@ -19,7 +19,9 @@ export const markNotificationsRead = (ids) => api.patch("/api/notifications/read
 
 export const getPayments = () => api.get("/api/payments");
 export const createPayment = (data) => api.post("/api/payments", data);
-export const updatePayment = (id, data) => api.patch(`/api/payments/${id}`, data);
+export const verifyPayment = (id, data) => api.post(`/api/payments/${id}/verify`, data);
+export const releasePayment = (id, data = {}) => api.post(`/api/payments/${id}/release`, data);
+export const refundPayment = (id, data = {}) => api.post(`/api/payments/${id}/refund`, data);
 
 export const getDisputes = () => api.get("/api/disputes");
 export const createDispute = (data) => api.post("/api/disputes", data);

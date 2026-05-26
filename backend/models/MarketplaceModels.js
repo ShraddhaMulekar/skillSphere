@@ -100,20 +100,78 @@ const paymentSchema = new Schema(
   {
     gig: { type: Schema.Types.ObjectId, ref: "gig", required: true },
     proposal: { type: Schema.Types.ObjectId, ref: "proposal" },
+    milestoneId: { type: Schema.Types.ObjectId },
     client: { type: Schema.Types.ObjectId, ref: "user", required: true },
     freelancer: { type: Schema.Types.ObjectId, ref: "user", required: true },
     milestoneTitle: { type: String, default: "Project escrow" },
     amount: { type: Number, required: true },
+    currency: { type: String, default: "INR" },
+    platformFee: { type: Number, default: 0 },
+    freelancerReceives: { type: Number, default: 0 },
     provider: { type: String, enum: ["razorpay", "stripe", "manual"], default: "manual" },
     providerOrderId: String,
+    providerPaymentId: String,
+    providerSignature: String,
+    checkout: {
+      orderId: String,
+      paymentIntentId: String,
+      clientSecret: String,
+      amountSubunits: Number,
+      currency: String,
+      publicKey: String,
+    },
+    payout: {
+      status: {
+        type: String,
+        enum: ["not_started", "scheduled", "paid", "failed"],
+        default: "not_started",
+      },
+      reference: String,
+      releasedAt: Date,
+    },
+    refund: {
+      amount: { type: Number, default: 0 },
+      reason: String,
+      status: {
+        type: String,
+        enum: ["none", "requested", "processed", "failed"],
+        default: "none",
+      },
+      reference: String,
+      processedAt: Date,
+    },
+    history: [
+      {
+        action: String,
+        from: String,
+        to: String,
+        note: String,
+        actor: { type: Schema.Types.ObjectId, ref: "user" },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
     status: {
       type: String,
-      enum: ["created", "escrowed", "released", "refunded", "failed"],
+      enum: [
+        "created",
+        "pending_provider",
+        "escrowed",
+        "submitted",
+        "approved",
+        "payout_pending",
+        "released",
+        "refund_pending",
+        "refunded",
+        "failed",
+      ],
       default: "created",
     },
   },
   { timestamps: true, versionKey: false },
 );
+
+paymentSchema.index({ gig: 1, milestoneId: 1 });
+paymentSchema.index({ client: 1, freelancer: 1, createdAt: -1 });
 
 const notificationSchema = new Schema(
   {

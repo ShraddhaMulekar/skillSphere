@@ -38,10 +38,27 @@ export default function Messages() {
   const [inCall, setInCall] = useState(false);
   const [callStatus, setCallStatus] = useState("idle"); // idle, connecting, active
   const localVideoRef = useRef(null);
+  const [localCameraReady, setLocalCameraReady] = useState(false);
+  const [remoteCameraReady, setRemoteCameraReady] = useState(false);
   
   // State for incoming call handling (freelancer side)
   const [incomingCallFrom, setIncomingCallFrom] = useState(null);
   const [showJoinButton, setShowJoinButton] = useState(false);
+
+  const attachLocalStream = async (stream) => {
+    if (!localVideoRef.current) return;
+    localVideoRef.current.srcObject = stream;
+    localVideoRef.current.muted = true;
+    localVideoRef.current.playsInline = true;
+    localVideoRef.current.autoplay = true;
+    try {
+      await localVideoRef.current.play();
+      setLocalCameraReady(true);
+    } catch (error) {
+      console.warn("Unable to autoplay local video preview", error);
+      setLocalCameraReady(true);
+    }
+  };
 
   const acceptCall = async () => {
     // Freelancer accepts the incoming call
@@ -50,9 +67,7 @@ export default function Messages() {
     setShowJoinButton(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
-      }
+      await attachLocalStream(stream);
       // Add local tracks to existing peer connection (created on call_offer)
       if (peerConnection.current) {
         stream.getTracks().forEach(track => peerConnection.current.addTrack(track, stream));
@@ -151,7 +166,13 @@ export default function Messages() {
         if (localVideoRef.current && localVideoRef.current.srcObject) {
           const tracks = localVideoRef.current.srcObject.getTracks();
           tracks.forEach((track) => track.stop());
+          localVideoRef.current.srcObject = null;
         }
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = null;
+        }
+        setLocalCameraReady(false);
+        setRemoteCameraReady(false);
         setInCall(false);
         setCallStatus('idle');
         setShowJoinButton(false);
@@ -171,6 +192,7 @@ export default function Messages() {
         pc.ontrack = (event) => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0];
+            setRemoteCameraReady(true);
           }
         };
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
@@ -232,11 +254,10 @@ export default function Messages() {
     let stream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
-      }
+      await attachLocalStream(stream);
     } catch (err) {
       console.error('Failed to get media devices', err);
+      setLocalCameraReady(false);
       setCallStatus('idle');
       return;
     }
@@ -251,6 +272,7 @@ export default function Messages() {
     pc.ontrack = (event) => {
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
+        setRemoteCameraReady(true);
       }
     };
     // Add local tracks
@@ -277,10 +299,15 @@ export default function Messages() {
       tracks.forEach((track) => track.stop());
       localVideoRef.current.srcObject = null;
     }
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
     if (peerConnection.current) {
       peerConnection.current.close();
       peerConnection.current = null;
     }
+    setLocalCameraReady(false);
+    setRemoteCameraReady(false);
     setInCall(false);
     setCallStatus('idle');
   };
@@ -532,18 +559,36 @@ export default function Messages() {
             </div>
             
             <div className="aspect-video w-full bg-slate-950 rounded-lg overflow-hidden border border-white/10 relative flex items-center justify-center">
-              {callStatus === "connecting" && (
+              {callStatus === "connecting" && !localCameraReady && (
                 <div className="text-center space-y-2">
                   <div className="w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                  <p className="text-xs text-slate-300">Connecting WebRTC peer...</p>
+                  <p className="text-xs text-slate-300">Requesting camera access...</p>
                 </div>
               )}
-              {callStatus === "active" && (
-                <div className="flex w-full h-full">
-                  <video ref={localVideoRef} autoPlay playsInline muted className="w-1/2 h-full object-cover transform -scale-x-100" />
-                  <video ref={remoteVideoRef} autoPlay playsInline className="w-1/2 h-full object-cover" />
+              <div className="flex w-full h-full">
+                <div className="relative w-1/2 h-full">
+                  <video
+                    ref={localVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover transform -scale-x-100"
+                  />
+                  {!localCameraReady && callStatus !== "idle" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-950/90 text-center px-3">
+                      <p className="text-xs text-slate-300">Waiting for camera preview...</p>
+                    </div>
+                  )}
                 </div>
-              )}
+                <div className="relative w-1/2 h-full bg-slate-900">
+                  <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                  {!remoteCameraReady && (
+                    <div className="absolute inset-0 flex items-center justify-center text-center px-3">
+                      <p className="text-xs text-slate-300">Waiting for remote participant...</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <Button variant="danger" className="w-full text-xs" onClick={endCall}>🔴 End Call</Button>

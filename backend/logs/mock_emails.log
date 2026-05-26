@@ -813,3 +813,19 @@ Password reset
 verificationCode: N/A
 ========================================
 
+
+========================================
+[2026-05-26T16:31:29.876Z] EMAIL SENT
+To: sakshimulekar2017@gmail.com
+Subject: Reset your SkillSphere password
+Links Found:
+  - http://localhost:5173/reset-password/283d4a74927cb65d3f43188eaef6ae28871df3740e4b925db04a8b49b886f4f8
+---------------------------
+Body:
+Password reset 
+                Hi sakshi mulekar, 
+                Click the link below to reset your password (expires in 10 minutes): 
+                http://localhost:5173/reset-password/283d4a74927cb65d3f43188eaef6ae28871df3740e4b925db04a8b49b886f4f8
+verificationCode: N/A
+========================================
+

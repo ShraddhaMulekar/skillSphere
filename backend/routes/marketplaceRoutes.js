@@ -22,9 +22,11 @@ import {
   listNotifications,
   listPayments,
   markNotificationRead,
+  refundPayment,
+  releasePayment,
   sendMessage,
   updateDispute,
-  updatePaymentStatus,
+  verifyPayment,
 } from "../controllers/collaborationController.js";
 
 export const marketplaceRoutes = express.Router();
@@ -51,7 +53,9 @@ marketplaceRoutes.patch("/notifications/read", markNotificationRead);
 
 marketplaceRoutes.get("/payments", listPayments);
 marketplaceRoutes.post("/payments", requireVerified, createPayment);
-marketplaceRoutes.patch("/payments/:id", requireVerified, updatePaymentStatus);
+marketplaceRoutes.post("/payments/:id/verify", requireVerified, verifyPayment);
+marketplaceRoutes.post("/payments/:id/release", requireVerified, releasePayment);
+marketplaceRoutes.post("/payments/:id/refund", requireVerified, refundPayment);
 
 marketplaceRoutes.get("/disputes", listDisputes);
 marketplaceRoutes.post("/disputes", requireVerified, createDispute);

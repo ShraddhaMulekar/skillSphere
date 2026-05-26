@@ -7,6 +7,7 @@ import {
 } from "../models/MarketplaceModels.js";
 import { ROLES } from "../constants/roles.js";
 import { createNotification } from "../utils/notify.js";
+import { createCheckout, createRefund, verifyRazorpaySignature, verifyStripePayment } from "../utils/paymentGateway.js";
 
 const makeRoom = (a, b, gig) => [String(gig || "general"), String(a), String(b)].sort().join(":");
 
@@ -87,6 +88,23 @@ export const listMessages = async (req, res) => {
   }
 };
 
+const PLATFORM_FEE_PERCENT = Number(process.env.PLATFORM_FEE_PERCENT || 10);
+
+const addPaymentHistory = (payment, { action, from, to, note, actor }) => {
+  payment.history.push({ action, from, to, note, actor });
+};
+
+const getPaymentAccessFilter = (user) =>
+  user.role === ROLES.ADMIN ? {} : { $or: [{ client: user._id }, { freelancer: user._id }] };
+
+const syncMilestoneStatus = async (gig, milestoneId, status) => {
+  if (!milestoneId) return;
+  const milestone = gig.milestones.id(milestoneId);
+  if (!milestone) return;
+  milestone.status = status;
+  await gig.save();
+};
+
 export const createPayment = async (req, res) => {
   try {
     const gig = await GigModel.findById(req.body.gig);
@@ -98,22 +116,63 @@ export const createPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Accept a freelancer before creating payment" });
     }
 
+    const provider = req.body.provider || "manual";
+    const amount = Number(req.body.amount);
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: "Payment amount must be greater than zero" });
+    }
+
+    const milestone = req.body.milestoneId ? gig.milestones.id(req.body.milestoneId) : null;
+    const milestoneTitle = req.body.milestoneTitle || milestone?.title || "Project escrow";
+    const currency = (req.body.currency || "INR").toUpperCase();
+    const platformFee = Number(((amount * PLATFORM_FEE_PERCENT) / 100).toFixed(2));
+    const freelancerReceives = Number((amount - platformFee).toFixed(2));
+
     const payment = await PaymentModel.create({
       gig: gig._id,
       proposal: req.body.proposal,
+      milestoneId: milestone?._id,
       client: gig.client,
       freelancer: gig.assignedFreelancer,
-      milestoneTitle: req.body.milestoneTitle,
-      amount: req.body.amount,
-      provider: req.body.provider || "manual",
-      providerOrderId: req.body.providerOrderId,
-      status: "escrowed",
+      milestoneTitle,
+      amount,
+      currency,
+      platformFee,
+      freelancerReceives,
+      provider,
+      status: provider === "manual" ? "escrowed" : "pending_provider",
     });
+
+    let checkout;
+    try {
+      checkout = await createCheckout({
+        provider,
+        amount,
+        currency,
+        receipt: String(payment._id),
+        description: `${gig.title} - ${milestoneTitle}`,
+      });
+    } catch (error) {
+      await payment.deleteOne();
+      throw error;
+    }
+
+    payment.checkout = checkout;
+    payment.providerOrderId = checkout.orderId || checkout.paymentIntentId;
+    addPaymentHistory(payment, {
+      action: provider === "manual" ? "escrow_funded" : "checkout_created",
+      from: "created",
+      to: payment.status,
+      note: provider === "manual" ? "Manual escrow recorded" : `${provider} checkout created`,
+      actor: req.user._id,
+    });
+    await payment.save();
+    await syncMilestoneStatus(gig, milestone?._id, provider === "manual" ? "funded" : "pending");
 
     await createNotification({
       user: gig.assignedFreelancer,
-      title: "Payment escrowed",
-      message: `Payment funded for ${gig.title}`,
+      title: provider === "manual" ? "Payment escrowed" : "Payment checkout created",
+      message: `${milestoneTitle} for ${gig.title} is ${payment.status}`,
       type: "payment",
       link: "/payments",
     });
@@ -124,24 +183,72 @@ export const createPayment = async (req, res) => {
   }
 };
 
-export const updatePaymentStatus = async (req, res) => {
+export const verifyPayment = async (req, res) => {
   try {
     const payment = await PaymentModel.findById(req.params.id);
     if (!payment) return res.status(404).json({ success: false, message: "Payment not found" });
-    const canUpdate =
-      req.user.role === ROLES.ADMIN ||
-      String(payment.client) === String(req.user._id);
-    if (!canUpdate) {
-      return res.status(403).json({ success: false, message: "You cannot update this payment" });
+    if (String(payment.client) !== String(req.user._id) && req.user.role !== ROLES.ADMIN) {
+      return res.status(403).json({ success: false, message: "Only the client can verify this payment" });
     }
 
-    payment.status = req.body.status || payment.status;
+    if (payment.provider === "razorpay") {
+      const orderId = req.body.razorpay_order_id || payment.providerOrderId;
+      const paymentId = req.body.razorpay_payment_id;
+      const signature = req.body.razorpay_signature;
+      if (!verifyRazorpaySignature({ orderId, paymentId, signature })) {
+        payment.status = "failed";
+        addPaymentHistory(payment, {
+          action: "verification_failed",
+          from: "pending_provider",
+          to: "failed",
+          note: "Razorpay signature mismatch",
+          actor: req.user._id,
+        });
+        await payment.save();
+        return res.status(400).json({ success: false, message: "Payment verification failed" });
+      }
+      payment.providerPaymentId = paymentId;
+      payment.providerSignature = signature;
+    } else if (payment.provider === "stripe") {
+      const paymentIntentId = req.body.paymentIntentId || payment.checkout?.paymentIntentId;
+      const verified = await verifyStripePayment({
+        paymentIntentId,
+        expectedAmount: payment.amount,
+        expectedCurrency: payment.currency,
+      });
+      if (!verified) {
+        payment.status = "failed";
+        addPaymentHistory(payment, {
+          action: "verification_failed",
+          from: "pending_provider",
+          to: "failed",
+          note: "Stripe payment intent was not confirmed",
+          actor: req.user._id,
+        });
+        await payment.save();
+        return res.status(400).json({ success: false, message: "Stripe payment verification failed" });
+      }
+      payment.providerPaymentId = paymentIntentId;
+    }
+
+    const previousStatus = payment.status;
+    payment.status = "escrowed";
+    addPaymentHistory(payment, {
+      action: "escrow_funded",
+      from: previousStatus,
+      to: "escrowed",
+      note: `${payment.provider} payment verified and escrowed`,
+      actor: req.user._id,
+    });
     await payment.save();
+
+    const gig = await GigModel.findById(payment.gig);
+    if (gig) await syncMilestoneStatus(gig, payment.milestoneId, "funded");
 
     await createNotification({
       user: payment.freelancer,
-      title: "Payment updated",
-      message: `Payment is now ${payment.status}`,
+      title: "Payment escrowed",
+      message: `${payment.milestoneTitle} is funded and held in escrow`,
       type: "payment",
       link: "/payments",
     });
@@ -152,12 +259,121 @@ export const updatePaymentStatus = async (req, res) => {
   }
 };
 
+export const releasePayment = async (req, res) => {
+  try {
+    const payment = await PaymentModel.findById(req.params.id);
+    if (!payment) return res.status(404).json({ success: false, message: "Payment not found" });
+    if (String(payment.client) !== String(req.user._id) && req.user.role !== ROLES.ADMIN) {
+      return res.status(403).json({ success: false, message: "Only the client can release escrow" });
+    }
+    if (!["escrowed", "approved"].includes(payment.status)) {
+      return res.status(400).json({ success: false, message: "Only escrowed payments can be released" });
+    }
+
+    const previousStatus = payment.status;
+    payment.status = "released";
+    payment.payout = {
+      status: "paid",
+      reference: req.body.payoutReference || `auto_payout_${Date.now()}`,
+      releasedAt: new Date(),
+    };
+    addPaymentHistory(payment, {
+      action: "payout_released",
+      from: previousStatus,
+      to: "released",
+      note: `Automatic freelancer payout of ${payment.currency} ${payment.freelancerReceives}`,
+      actor: req.user._id,
+    });
+    await payment.save();
+
+    const gig = await GigModel.findById(payment.gig);
+    if (gig) await syncMilestoneStatus(gig, payment.milestoneId, "paid");
+
+    await createNotification({
+      user: payment.freelancer,
+      title: "Payout released",
+      message: `${payment.currency} ${payment.freelancerReceives} released for ${payment.milestoneTitle}`,
+      type: "payment",
+      link: "/payments",
+    });
+
+    return res.json({ success: true, payment });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to release payment", error: error.message });
+  }
+};
+
+export const refundPayment = async (req, res) => {
+  try {
+    const payment = await PaymentModel.findById(req.params.id);
+    if (!payment) return res.status(404).json({ success: false, message: "Payment not found" });
+    if (String(payment.client) !== String(req.user._id) && req.user.role !== ROLES.ADMIN) {
+      return res.status(403).json({ success: false, message: "Only the client can refund escrow" });
+    }
+    if (!["escrowed", "pending_provider", "failed"].includes(payment.status)) {
+      return res.status(400).json({ success: false, message: "Released payments cannot be refunded here" });
+    }
+
+    const refundAmount = Number(req.body.amount || payment.amount);
+    if (refundAmount <= 0 || refundAmount > payment.amount) {
+      return res.status(400).json({ success: false, message: "Refund amount is invalid" });
+    }
+
+    const previousStatus = payment.status;
+    payment.status = "refund_pending";
+    payment.refund = {
+      amount: refundAmount,
+      reason: req.body.reason || "Client requested refund",
+      status: "requested",
+    };
+    addPaymentHistory(payment, {
+      action: "refund_requested",
+      from: previousStatus,
+      to: "refund_pending",
+      note: payment.refund.reason,
+      actor: req.user._id,
+    });
+
+    const reference = await createRefund({
+      provider: payment.provider,
+      paymentId: payment.providerPaymentId,
+      amount: refundAmount,
+      currency: payment.currency,
+    });
+
+    payment.status = "refunded";
+    payment.refund.status = "processed";
+    payment.refund.reference = reference;
+    payment.refund.processedAt = new Date();
+    addPaymentHistory(payment, {
+      action: "refund_processed",
+      from: "refund_pending",
+      to: "refunded",
+      note: `${payment.currency} ${refundAmount} refunded`,
+      actor: req.user._id,
+    });
+    await payment.save();
+
+    const gig = await GigModel.findById(payment.gig);
+    if (gig) await syncMilestoneStatus(gig, payment.milestoneId, "pending");
+
+    await createNotification({
+      user: payment.freelancer,
+      title: "Payment refunded",
+      message: `${payment.milestoneTitle} was refunded`,
+      type: "payment",
+      link: "/payments",
+    });
+
+    return res.json({ success: true, payment });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to refund payment", error: error.message });
+  }
+};
+
 export const listPayments = async (req, res) => {
   try {
-    const filter =
-      req.user.role === ROLES.ADMIN
-        ? {}
-        : { $or: [{ client: req.user._id }, { freelancer: req.user._id }] };
+    const filter = getPaymentAccessFilter(req.user);
     const payments = await PaymentModel.find(filter)
       .populate("gig", "title")
       .populate("client freelancer", "name email")

@@ -26,6 +26,12 @@ export default function GigDetail() {
   const [proposal, setProposal] = useState({ description: "", bidAmount: "", estimatedDays: "" });
   const [progress, setProgress] = useState({ progress: "", note: "" });
   const [review, setReview] = useState({ rating: 5, comment: "" });
+  const [paymentRequest, setPaymentRequest] = useState({
+    provider: "razorpay",
+    milestoneId: "",
+    amount: "",
+    milestoneTitle: "Project escrow",
+  });
 
   const gigQuery = useQuery({
     queryKey: ["gig", id],
@@ -51,7 +57,15 @@ export default function GigDetail() {
     onSuccess: refresh,
   });
   const paymentMutation = useMutation({
-    mutationFn: () => createPayment({ gig: id, amount: gig.budgetMax || gig.budgetMin || 0, milestoneTitle: "Project escrow" }),
+    mutationFn: () =>
+      createPayment({
+        gig: id,
+        provider: paymentRequest.provider,
+        milestoneId: paymentRequest.milestoneId || undefined,
+        amount: Number(paymentRequest.amount || gig.budgetMax || gig.budgetMin || 0),
+        milestoneTitle: paymentRequest.milestoneTitle || "Project escrow",
+      }),
+    onSuccess: () => navigate("/payments"),
   });
 
   const deleteMutation = useMutation({
@@ -78,7 +92,7 @@ export default function GigDetail() {
         action={<Link to="/gigs"><Button variant="secondary">Back</Button></Link>}
       />
 
-      <Alert type="error" message={proposalMutation.error?.response?.data?.message || statusMutation.error?.response?.data?.message} />
+      <Alert type="error" message={proposalMutation.error?.response?.data?.message || statusMutation.error?.response?.data?.message || paymentMutation.error?.response?.data?.message} />
 
       <section className="rounded-xl border border-white/10 bg-slate-800/50 p-4 sm:p-6 space-y-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -175,7 +189,55 @@ export default function GigDetail() {
             <Button onClick={() => progressMutation.mutate()}>Update Progress</Button>
           </div>
           {(isOwner || user?.role === "admin") && <Button variant="danger" onClick={() => deleteMutation.mutate()}>Delete Gig</Button>}
-          {isOwner && <Button variant="secondary" onClick={() => paymentMutation.mutate()}>Fund Escrow Payment</Button>}
+          {isOwner && (
+            <div className="rounded-lg border border-white/10 bg-slate-950/60 p-3 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <select
+                  value={paymentRequest.provider}
+                  onChange={(e) => setPaymentRequest({ ...paymentRequest, provider: e.target.value })}
+                  className="rounded-lg bg-slate-950 border border-white/10 px-3 py-2 text-white"
+                >
+                  <option value="razorpay">Razorpay</option>
+                  <option value="stripe">Stripe</option>
+                  <option value="manual">Manual escrow</option>
+                </select>
+                <select
+                  value={paymentRequest.milestoneId}
+                  onChange={(e) => {
+                    const selected = (gig.milestones || []).find((item) => item._id === e.target.value);
+                    setPaymentRequest({
+                      ...paymentRequest,
+                      milestoneId: e.target.value,
+                      milestoneTitle: selected?.title || "Project escrow",
+                      amount: selected?.amount || paymentRequest.amount,
+                    });
+                  }}
+                  className="rounded-lg bg-slate-950 border border-white/10 px-3 py-2 text-white"
+                >
+                  <option value="">Project escrow</option>
+                  {(gig.milestones || []).map((milestone) => (
+                    <option key={milestone._id} value={milestone._id}>
+                      {milestone.title}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min="1"
+                  value={paymentRequest.amount}
+                  onChange={(e) => setPaymentRequest({ ...paymentRequest, amount: e.target.value })}
+                  placeholder={`Amount (${gig.budgetMax || gig.budgetMin || 0})`}
+                  className="rounded-lg bg-slate-950 border border-white/10 px-3 py-2 text-white"
+                />
+                <Button variant="secondary" disabled={paymentMutation.isPending} onClick={() => paymentMutation.mutate()}>
+                  Fund Escrow
+                </Button>
+              </div>
+              <p className="text-xs text-slate-400">
+                Razorpay/Stripe create checkout records. Manual escrow records an already-collected payment.
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-[8rem_1fr_auto] gap-3">
             <input type="number" min="1" max="5" value={review.rating} onChange={(e) => setReview({ ...review, rating: e.target.value })} className="rounded-lg bg-slate-950 border border-white/10 px-3 py-2 text-white" />
             <input value={review.comment} onChange={(e) => setReview({ ...review, comment: e.target.value })} placeholder="Review comment" className="rounded-lg bg-slate-950 border border-white/10 px-3 py-2 text-white" />
