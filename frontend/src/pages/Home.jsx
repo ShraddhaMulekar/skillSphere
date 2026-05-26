@@ -53,17 +53,25 @@ export default function Home() {
           milestone payments, and real-time collaboration — all in one place.
         </p>
         <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center w-full max-w-md sm:max-w-none animate-fade-in-up">
-          <Link to="/register" className="w-full sm:w-auto">
+          <Link to="/register" state={{ role: "client" }} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8">
               Start as Client
             </Button>
           </Link>
-          <Link to="/register" className="w-full sm:w-auto">
+          <Link to="/register" state={{ role: "freelancer" }} className="w-full sm:w-auto">
             <Button
               variant="secondary"
               className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8"
             >
               Join as Freelancer
+            </Button>
+          </Link>
+          <Link to="/register" state={{ role: "admin" }} className="w-full sm:w-auto">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 text-amber-300 border-amber-500/50 hover:bg-amber-500/10"
+            >
+              Connect as Admin
             </Button>
           </Link>
         </div>

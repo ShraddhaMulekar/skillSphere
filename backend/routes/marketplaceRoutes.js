@@ -5,6 +5,7 @@ import {
   createGig,
   createProposal,
   createReview,
+  deleteGig,
   getGig,
   getMyAnalytics,
   getRecommendations,
@@ -33,6 +34,7 @@ marketplaceRoutes.use(protect);
 marketplaceRoutes.get("/gigs", listGigs);
 marketplaceRoutes.post("/gigs", requireVerified, createGig);
 marketplaceRoutes.get("/gigs/:id", getGig);
+marketplaceRoutes.delete("/gigs/:id", deleteGig);
 marketplaceRoutes.patch("/gigs/:id/progress", requireVerified, updateGigProgress);
 marketplaceRoutes.get("/gigs/:gigId/recommendations", requireVerified, getRecommendations);
 marketplaceRoutes.post("/gigs/:gigId/proposals", requireVerified, createProposal);

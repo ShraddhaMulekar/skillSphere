@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { getMe, resendVerification } from "../api/authApi";
 import { getMyAnalytics, getNotifications } from "../api/marketplaceApi";
 import Loader from "../components/ui/Loader";
@@ -56,10 +57,10 @@ export default function Dashboard() {
   const analytics = analyticsQuery.data || {};
   const unread = (notificationsQuery.data || []).filter((item) => !item.read).length;
   const statCards = [
-    { label: "Profile Views", value: analytics.profileViews || 0, color: "from-indigo-500 to-violet-500", icon: "Views" },
-    { label: "Active Projects", value: analytics.activeProjects || 0, color: "from-cyan-500 to-blue-500", icon: "Work" },
-    { label: "Earnings", value: `INR ${analytics.earnings || 0}`, color: "from-emerald-500 to-teal-500", icon: "Pay" },
-    { label: "Unread Alerts", value: unread, color: "from-amber-500 to-orange-500", icon: "Alert" },
+    { label: "Profile Views", value: analytics.profileViews || 0, color: "from-indigo-500 to-violet-500", icon: "Views", to: "/profile" },
+    { label: "Active Projects", value: analytics.activeProjects || 0, color: "from-cyan-500 to-blue-500", icon: "Work", to: "/gigs" },
+    { label: "Earnings", value: `INR ${analytics.earnings || 0}`, color: "from-emerald-500 to-teal-500", icon: "Pay", to: "/payments" },
+    { label: "Unread Alerts", value: unread, color: "from-amber-500 to-orange-500", icon: "Alert", to: "/notifications" },
   ];
 
   const latestUser = meQuery.data || user;
@@ -107,7 +108,11 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         {statCards.map((card) => (
-          <div key={card.label} className={`bg-gradient-to-br ${card.color} rounded-xl p-4 sm:p-6 text-white shadow-xl`}>
+          <Link
+            key={card.label}
+            to={card.to}
+            className={`bg-gradient-to-br ${card.color} rounded-xl p-4 sm:p-6 text-white shadow-xl hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 block cursor-pointer`}
+          >
             <div className="flex justify-between items-start gap-2">
               <div className="min-w-0">
                 <p className="text-white/80 text-xs sm:text-sm truncate">{card.label}</p>
@@ -115,7 +120,7 @@ export default function Dashboard() {
               </div>
               <span className="text-[10px] uppercase tracking-wide text-white/70">{card.icon}</span>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 

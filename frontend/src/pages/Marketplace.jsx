@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useState } from "react";
-import { getGigs, getTrendingSkills } from "../api/marketplaceApi";
+import { getGigs, getTrendingSkills, deleteGig } from "../api/marketplaceApi";
 import Button from "../components/ui/Button";
 import EmptyState from "../components/ui/EmptyState";
 import Loader from "../components/ui/Loader";
@@ -12,6 +12,7 @@ import StatusBadge from "../components/ui/StatusBadge";
 export default function Marketplace() {
   const { user } = useSelector((state) => state.auth);
   const [filters, setFilters] = useState({ q: "", skill: "", location: "", status: "open" });
+  const queryClient = useQueryClient();
 
   const gigsQuery = useQuery({
     queryKey: ["gigs", filters],
@@ -21,6 +22,21 @@ export default function Marketplace() {
     queryKey: ["trending-skills"],
     queryFn: async () => (await getTrendingSkills()).data.skills,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (gigId) => deleteGig(gigId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gigs"] });
+    },
+  });
+
+  const handleDelete = (e, gigId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this gig?")) {
+      deleteMutation.mutate(gigId);
+    }
+  };
 
   const updateFilter = (event) => {
     setFilters({ ...filters, [event.target.name]: event.target.value });
@@ -58,26 +74,42 @@ export default function Marketplace() {
 
           {gigsQuery.data?.length ? (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              {gigsQuery.data.map((gig) => (
-                <Link key={gig._id} to={`/gigs/${gig._id}`} className="rounded-xl border border-white/10 bg-slate-800/50 p-4 hover:bg-slate-800 transition-colors">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h3 className="text-white font-semibold truncate">{gig.title}</h3>
-                      <p className="text-slate-400 text-sm mt-1 line-clamp-2">{gig.description}</p>
+              {gigsQuery.data.map((gig) => {
+                const isOwner = String(gig.client?._id) === String(user?.id);
+                const canDelete = isOwner || user?.role === "admin";
+
+                return (
+                  <Link key={gig._id} to={`/gigs/${gig._id}`} className="rounded-xl border border-white/10 bg-slate-800/50 p-4 hover:bg-slate-800 transition-colors">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-white font-semibold truncate">{gig.title}</h3>
+                        <p className="text-slate-400 text-sm mt-1 line-clamp-2">{gig.description}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <StatusBadge value={gig.status} />
+                        {canDelete && (
+                          <button
+                            type="button"
+                            onClick={(e) => handleDelete(e, gig._id)}
+                            className="rounded-lg bg-red-500/10 text-red-400 px-2.5 py-1 text-xs font-medium hover:bg-red-500/20 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <StatusBadge value={gig.status} />
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {(gig.skills || []).map((skill) => (
-                      <span key={skill} className="rounded-full bg-cyan-500/10 text-cyan-200 px-2.5 py-1 text-xs">{skill}</span>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between mt-4 text-sm text-slate-300">
-                    <span>{gig.location || "Remote/local"}</span>
-                    <span>INR {gig.budgetMin || 0} - {gig.budgetMax || 0}</span>
-                  </div>
-                </Link>
-              ))}
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {(gig.skills || []).map((skill) => (
+                        <span key={skill} className="rounded-full bg-cyan-500/10 text-cyan-200 px-2.5 py-1 text-xs">{skill}</span>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between mt-4 text-sm text-slate-300">
+                      <span>{gig.location || "Remote/local"}</span>
+                      <span>INR {gig.budgetMin || 0} - {gig.budgetMax || 0}</span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <EmptyState title="No gigs found" message="Try changing filters or create a new client gig." />

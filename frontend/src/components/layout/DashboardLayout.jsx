@@ -230,6 +230,19 @@ export default function DashboardLayout() {
                 </span>
               </NavLink>
             ))}
+            {user?.role === "admin" && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  `flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl min-w-[4.5rem] transition-colors ${
+                    isActive ? "text-amber-400" : "text-white/50"
+                  }`
+                }
+              >
+                <span className="text-[10px] uppercase">Admin</span>
+                <span className="text-[10px] sm:text-xs font-medium">Admin</span>
+              </NavLink>
+            )}
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}

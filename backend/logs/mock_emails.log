@@ -712,3 +712,104 @@ Password reset
 verificationCode: N/A
 ========================================
 
+
+========================================
+[2026-05-26T08:46:50.929Z] EMAIL SENT
+To: shraddha150198@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/ed33e76460468daca0b334d7073df45f7b87a8fe098be75b61202b8f45eccb43
+  - http://localhost:5000/auth/verify-email/ed33e76460468daca0b334d7073df45f7b87a8fe098be75b61202b8f45eccb43
+---------------------------
+Body:
+Hi SHRADDHA MULEKAR! 
+                Your 6-digit verification code is: 
+                  
+                   852990
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/ed33e76460468daca0b334d7073df45f7b87a8fe098be75b61202b8f45eccb43
+verificationCode: 852990
+========================================
+
+
+========================================
+[2026-05-26T08:53:36.097Z] EMAIL SENT
+To: shraddhaachs@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/c8279dd83adaec6eee4cdab7d3a6275200a9a11fbe641528f8e68679edc7085a
+  - http://localhost:5000/auth/verify-email/c8279dd83adaec6eee4cdab7d3a6275200a9a11fbe641528f8e68679edc7085a
+---------------------------
+Body:
+Hi SHRADDHA MULEKAR! 
+                Your 6-digit verification code is: 
+                  
+                   894380
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/c8279dd83adaec6eee4cdab7d3a6275200a9a11fbe641528f8e68679edc7085a
+verificationCode: 894380
+========================================
+
+
+========================================
+[2026-05-26T09:53:16.109Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/68a68bfdc7f67ed21621c5a1a3af45cf802a66a68da2b22ee5df2e7003f75fa5
+  - http://localhost:5000/auth/verify-email/68a68bfdc7f67ed21621c5a1a3af45cf802a66a68da2b22ee5df2e7003f75fa5
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is: 
+                  
+                   713112
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/68a68bfdc7f67ed21621c5a1a3af45cf802a66a68da2b22ee5df2e7003f75fa5
+verificationCode: 713112
+========================================
+
+
+========================================
+[2026-05-26T10:51:29.248Z] EMAIL SENT
+To: shraddha150198@gmail.com
+Subject: Reset your SkillSphere password
+Links Found:
+  - http://localhost:5173/reset-password/1ad3bb85156f184a26256b4f6856210742743cfdbd07b6a3ffa92b8a97396fc3
+---------------------------
+Body:
+Password reset 
+                Hi SHRADDHA MULEKAR, 
+                Click the link below to reset your password (expires in 10 minutes): 
+                http://localhost:5173/reset-password/1ad3bb85156f184a26256b4f6856210742743cfdbd07b6a3ffa92b8a97396fc3
+verificationCode: N/A
+========================================
+
+
+========================================
+[2026-05-26T10:51:34.549Z] EMAIL SENT
+To: shraddha150198@gmail.com
+Subject: Reset your SkillSphere password
+Links Found:
+  - http://localhost:5173/reset-password/6cba4a46799877aea75466bfc29a0b84767541a22945d3ef8613d1c69acf4ca0
+---------------------------
+Body:
+Password reset 
+                Hi SHRADDHA MULEKAR, 
+                Click the link below to reset your password (expires in 10 minutes): 
+                http://localhost:5173/reset-password/6cba4a46799877aea75466bfc29a0b84767541a22945d3ef8613d1c69acf4ca0
+verificationCode: N/A
+========================================
+

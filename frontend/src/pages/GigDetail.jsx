@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import {
@@ -10,7 +10,7 @@ import {
   submitProposal,
   updateGigProgress,
   updateProposal,
-} from "../api/marketplaceApi";
+  deleteGig, } from "../api/marketplaceApi";
 import Alert from "../components/ui/Alert";
 import Button from "../components/ui/Button";
 import EmptyState from "../components/ui/EmptyState";
@@ -22,6 +22,7 @@ export default function GigDetail() {
   const { id } = useParams();
   const { user } = useSelector((state) => state.auth);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [proposal, setProposal] = useState({ description: "", bidAmount: "", estimatedDays: "" });
   const [progress, setProgress] = useState({ progress: "", note: "" });
   const [review, setReview] = useState({ rating: 5, comment: "" });
@@ -51,6 +52,11 @@ export default function GigDetail() {
   });
   const paymentMutation = useMutation({
     mutationFn: () => createPayment({ gig: id, amount: gig.budgetMax || gig.budgetMin || 0, milestoneTitle: "Project escrow" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteGig(id),
+    onSuccess: () => navigate('/gigs'),
   });
   const reviewMutation = useMutation({
     mutationFn: () => createReview({ gig: id, ...review, rating: Number(review.rating) }),
@@ -100,7 +106,7 @@ export default function GigDetail() {
               <input type="number" value={proposal.bidAmount} onChange={(e) => setProposal({ ...proposal, bidAmount: e.target.value })} placeholder="Bid amount" className="rounded-lg bg-slate-950 border border-white/10 px-3 py-2 text-white" />
               <input type="number" value={proposal.estimatedDays} onChange={(e) => setProposal({ ...proposal, estimatedDays: e.target.value })} placeholder="Days" className="rounded-lg bg-slate-950 border border-white/10 px-3 py-2 text-white" />
             </div>
-            <Button onClick={() => proposalMutation.mutate()} disabled={proposalMutation.isPending}>Apply</Button>
+            <Button onClick={() => proposalMutation.mutate()}>Apply</Button>
           </section>
         )}
 
@@ -124,7 +130,7 @@ export default function GigDetail() {
         )}
       </div>
 
-      {isOwner && (
+      {(isOwner || user?.role === "admin" || (proposals && proposals.length > 0)) && (
         <section className="rounded-xl border border-white/10 bg-slate-800/50 p-4 space-y-3">
           <h3 className="text-white font-semibold">Proposals</h3>
           {proposals?.length ? proposals.map((item) => (
@@ -137,12 +143,24 @@ export default function GigDetail() {
                 <StatusBadge value={item.status} />
               </div>
               <p className="text-slate-300 text-sm mt-2">{item.description}</p>
-              {item.status === "pending" && (
-                <div className="flex gap-2 mt-3">
-                  <Button className="px-3 py-1.5 text-xs" onClick={() => statusMutation.mutate({ proposalId: item._id, data: { status: "accepted" } })}>Accept</Button>
-                  <Button className="px-3 py-1.5 text-xs" variant="danger" onClick={() => statusMutation.mutate({ proposalId: item._id, data: { status: "rejected" } })}>Reject</Button>
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                {item.status === "pending" && (isOwner || user?.role === "admin") && (
+                  <>
+                    <Button className="px-3 py-1.5 text-xs" onClick={() => statusMutation.mutate({ proposalId: item._id, data: { status: "accepted" } })}>Accept</Button>
+                    <Button className="px-3 py-1.5 text-xs" variant="danger" onClick={() => statusMutation.mutate({ proposalId: item._id, data: { status: "rejected" } })}>Reject</Button>
+                  </>
+                )}
+                {(isOwner || user?.role === "admin") && (
+                  <Link to={`/messages?receiver=${item.freelancer?._id || item.freelancer}&name=${encodeURIComponent(item.freelancer?.name || "")}&gig=${gig._id}`}>
+                    <Button variant="secondary" className="px-3 py-1.5 text-xs">💬 Chat with Freelancer</Button>
+                  </Link>
+                )}
+                {String(item.freelancer?._id || item.freelancer) === String(user?.id || user?._id) && (
+                  <Link to={`/messages?receiver=${gig.client?._id || gig.client}&name=${encodeURIComponent(gig.client?.name || "")}&gig=${gig._id}`}>
+                    <Button variant="secondary" className="px-3 py-1.5 text-xs">💬 Chat with Client</Button>
+                  </Link>
+                )}
+              </div>
             </div>
           )) : <EmptyState title="No proposals yet" />}
         </section>
@@ -156,6 +174,7 @@ export default function GigDetail() {
             <input value={progress.note} onChange={(e) => setProgress({ ...progress, note: e.target.value })} placeholder="Progress note" className="rounded-lg bg-slate-950 border border-white/10 px-3 py-2 text-white" />
             <Button onClick={() => progressMutation.mutate()}>Update Progress</Button>
           </div>
+          {(isOwner || user?.role === "admin") && <Button variant="danger" onClick={() => deleteMutation.mutate()}>Delete Gig</Button>}
           {isOwner && <Button variant="secondary" onClick={() => paymentMutation.mutate()}>Fund Escrow Payment</Button>}
           <div className="grid grid-cols-1 md:grid-cols-[8rem_1fr_auto] gap-3">
             <input type="number" min="1" max="5" value={review.rating} onChange={(e) => setReview({ ...review, rating: e.target.value })} className="rounded-lg bg-slate-950 border border-white/10 px-3 py-2 text-white" />

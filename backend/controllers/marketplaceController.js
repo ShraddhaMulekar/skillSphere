@@ -85,7 +85,7 @@ export const getGig = async (req, res) => {
     const proposals =
       req.user.role === ROLES.ADMIN || String(gig.client._id) === String(req.user._id)
         ? await ProposalModel.find({ gig: gig._id }).populate("freelancer", "name email location skills verificationBadge")
-        : await ProposalModel.find({ gig: gig._id, freelancer: req.user._id });
+        : await ProposalModel.find({ gig: gig._id, freelancer: req.user._id }).populate("freelancer", "name email location skills verificationBadge");
 
     return res.json({ success: true, gig, proposals });
   } catch (error) {
@@ -149,7 +149,7 @@ export const createProposal = async (req, res) => {
       link: `/gigs/${gig._id}`,
     });
 
-    return res.status(201).json({ success: true, proposal });
+    return res.status(201).json({ success: true, proposal, message: "Proposal submitted successfully" });
   } catch (error) {
     const message = error.code === 11000 ? "You already applied to this gig" : "Failed to create proposal";
     return res.status(error.code === 11000 ? 400 : 500).json({ success: false, message, error: error.message });
@@ -307,5 +307,20 @@ export const getMyAnalytics = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch analytics", error: error.message });
+  }
+};
+
+// Delete gig
+export const deleteGig = async (req, res) => {
+  try {
+    const gig = await GigModel.findById(req.params.id);
+    if (!gig) return res.status(404).json({ success: false, message: "Gig not found" });
+    if (!canAccessGig(req.user, gig)) {
+      return res.status(403).json({ success: false, message: "Not authorized to delete this gig" });
+    }
+    await gig.deleteOne();
+    return res.json({ success: true, message: "Gig deleted" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to delete gig", error: error.message });
   }
 };

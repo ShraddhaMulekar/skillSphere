@@ -40,7 +40,7 @@ export const loginController = async (req, res) => {
     if (!isMatch) {
       return res
         .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+        .json({ success: false, message: "Invalid Password!" });
     }
 
     if (user.twoFactorEnabled) {

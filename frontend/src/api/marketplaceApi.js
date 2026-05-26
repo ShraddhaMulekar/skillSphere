@@ -4,6 +4,7 @@ export const getGigs = (params = {}) => api.get("/api/gigs", { params });
 export const getGig = (id) => api.get(`/api/gigs/${id}`);
 export const createGig = (data) => api.post("/api/gigs", data);
 export const updateGigProgress = (id, data) => api.patch(`/api/gigs/${id}/progress`, data);
+export const deleteGig = (id) => api.delete(`/api/gigs/${id}`);
 export const getRecommendations = (gigId) => api.get(`/api/gigs/${gigId}/recommendations`);
 export const submitProposal = (gigId, data) => api.post(`/api/gigs/${gigId}/proposals`, data);
 export const updateProposal = (id, data) => api.patch(`/api/proposals/${id}`, data);

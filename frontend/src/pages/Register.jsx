@@ -10,20 +10,22 @@ import Card from "../components/ui/Card";
 import Alert from "../components/ui/Alert";
 import { registerUser } from "../api/authApi";
 import { setCredentials } from "../store/authSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 
 const roleOptions = [
   { value: "client", label: "Client – I want to hire" },
   { value: "freelancer", label: "Freelancer – I want to work" },
+  { value: "admin", label: "Admin – I want to manage" },
 ];
 
 export default function Register() {
+  const location = useLocation();
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
-    role: "client",
+    role: location.state?.role || "client",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");

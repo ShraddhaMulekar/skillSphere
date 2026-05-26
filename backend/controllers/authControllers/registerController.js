@@ -30,7 +30,7 @@ export const registerController = async (req, res) => {
     if (!PUBLIC_REGISTER_ROLES.includes(role)) {
       return res.status(400).json({
         success: false,
-        message: "Role must be client or freelancer",
+        message: "Role must be client, freelancer, or admin",
       });
     }
 

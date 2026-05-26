@@ -44,15 +44,26 @@ export const sendMessage = async (req, res) => {
       files,
     });
 
+    const populatedMessage = await MessageModel.findById(message._id)
+      .populate("sender receiver", "name email avatar role");
+
     await createNotification({
       user: receiver,
       title: "New message",
       message: `${req.user.name}: ${text || "sent a file"}`,
       type: "message",
-      link: "/messages",
+      link: `/messages?receiver=${req.user._id}${gig ? `&gig=${gig}` : ""}`,
     });
 
-    return res.status(201).json({ success: true, message });
+    const io = req.app.get("io");
+    if (io) {
+      // Send to the room
+      io.to(populatedMessage.room).emit("new_message", populatedMessage);
+      // Send to the receiver's personal channel for immediate alert
+      io.to(String(receiver)).emit("message_notification", populatedMessage);
+    }
+
+    return res.status(201).json({ success: true, message: populatedMessage });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to send message", error: error.message });
   }
@@ -165,7 +176,7 @@ export const createDispute = async (req, res) => {
     const against = String(gig.client) === String(req.user._id) ? gig.assignedFreelancer : gig.client;
     const dispute = await DisputeModel.create({
       gig: gig._id,
-      payment: req.body.payment,
+      payment: req.body.payment || undefined,
       raisedBy: req.user._id,
       against,
       reason: req.body.reason,

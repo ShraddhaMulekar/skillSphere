@@ -19,7 +19,12 @@ export const updateProfile = async (req, res) => {
       certifications,
       experience,
       availability,
+      role,
     } = req.body;
+
+    if (role && ["client", "freelancer", "admin"].includes(role)) {
+      user.role = role;
+    }
 
     if (name) user.name = name;
     if (phone !== undefined) user.phone = phone;
