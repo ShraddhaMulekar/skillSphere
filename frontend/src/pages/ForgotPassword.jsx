@@ -12,14 +12,17 @@ import { forgotPassword, resetPassword } from "../api/authApi";
 export default function ForgotPassword() {
   const { token: rawToken } = useParams();
   const token = rawToken ? decodeURIComponent(rawToken) : "";
+  const [email, setEmail] = useState("");
   const [directToken, setDirectToken] = useState("");
+  const navigate = useNavigate()
   // Mutation to obtain a reset token without sending email link
   const getTokenMutation = useMutation({
-    mutationFn: () => forgotPassword(email),
+    mutationFn: (emailVal) => forgotPassword(emailVal || email),
     onSuccess: (res) => {
       if (res.data.resetToken) {
         setDirectToken(res.data.resetToken);
         setShowResetForm(true);
+        setError("");
       } else {
         setError("Unable to obtain reset token");
       }
@@ -75,6 +78,8 @@ export default function ForgotPassword() {
       setNewPass("");
       setConfirmPass("");
       setHideAll(false);
+      alert("Password reset successful! Please log in with your new password.");
+      navigate("/login");
     },
     onError: (err) => {
       const msg = err.response?.data?.message || "Reset failed";
@@ -180,7 +185,7 @@ export default function ForgotPassword() {
         {showResetForm && !hideAll && (
           <form onSubmit={handleResetPassword} className="mt-4">
             <Input
-              label="New Password"
+              label="Enter New Password"
               type="password"
               name="newPass"
               value={newPass}
@@ -189,7 +194,7 @@ export default function ForgotPassword() {
               required
             />
             <Input
-              label="Confirm Password"
+              label="Re-enter New Password"
               type="password"
               name="confirmPass"
               value={confirmPass}
@@ -203,8 +208,8 @@ export default function ForgotPassword() {
               disabled={resetPasswordMutation.isPending}
             >
               {resetPasswordMutation.isPending
-                ? "Resetting..."
-                : "Reset Password"}
+                ? "Setting new password..."
+                : "Set New Password"}
             </Button>
           </form>
         )}

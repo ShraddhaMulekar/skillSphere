@@ -664,3 +664,51 @@ Hi shraddha!
 verificationCode: 354720
 ========================================
 
+
+========================================
+[2026-05-26T08:14:40.194Z] EMAIL SENT
+To: shraddhaachs@gmail.com
+Subject: Reset your SkillSphere password
+Links Found:
+  - http://localhost:5173/reset-password/4ef6bbe025182659077c9293b0b199e3ef5ef1bdbf2cb9dc1e2d8a33055319a5
+---------------------------
+Body:
+Password reset 
+                Hi shraddha, 
+                Click the link below to reset your password (expires in 10 minutes): 
+                http://localhost:5173/reset-password/4ef6bbe025182659077c9293b0b199e3ef5ef1bdbf2cb9dc1e2d8a33055319a5
+verificationCode: N/A
+========================================
+
+
+========================================
+[2026-05-26T08:23:55.963Z] EMAIL SENT
+To: shraddhaachs@gmail.com
+Subject: Reset your SkillSphere password
+Links Found:
+  - http://localhost:5173/reset-password/d8ab545c274b322b903e8c612c573a320a22a2936f66f315ef88e59d644ce81a
+---------------------------
+Body:
+Password reset 
+                Hi shraddha, 
+                Click the link below to reset your password (expires in 10 minutes): 
+                http://localhost:5173/reset-password/d8ab545c274b322b903e8c612c573a320a22a2936f66f315ef88e59d644ce81a
+verificationCode: N/A
+========================================
+
+
+========================================
+[2026-05-26T08:29:52.028Z] EMAIL SENT
+To: shraddhaachs@gmail.com
+Subject: Reset your SkillSphere password
+Links Found:
+  - http://localhost:5173/reset-password/5e3147e6d734ac9ff86776154746bc3bbcfe910c9199259358873b6a7f31c710
+---------------------------
+Body:
+Password reset 
+                Hi shraddha, 
+                Click the link below to reset your password (expires in 10 minutes): 
+                http://localhost:5173/reset-password/5e3147e6d734ac9ff86776154746bc3bbcfe910c9199259358873b6a7f31c710
+verificationCode: N/A
+========================================
+

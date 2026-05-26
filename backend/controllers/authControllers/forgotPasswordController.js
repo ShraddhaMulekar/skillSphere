@@ -16,16 +16,16 @@ export const forgotPassword = async (req, res) => {
 
     const user = await UserModel.findOne({ email: email.toLowerCase() });
     if (!user) {
-      return res.json({
-        success: true,
-        message: "If that email exists, a reset link has been sent",
+      return res.status(404).json({
+        success: false,
+        message: "User not registered, Please Register now!",
       });
     }
 
     if (user.authProvider === "google" && !user.password) {
-      return res.json({
-        success: true,
-        message: "If that email exists, a reset link has been sent",
+      return res.status(400).json({
+        success: false,
+        message: "This email is registered with Google Sign-In. Please use Google Login.",
       });
     }
 
@@ -35,7 +35,7 @@ export const forgotPassword = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     const encodedToken = encodeURIComponent(resetToken);
-  const resetURL = `${clientUrl}/reset-password/${encodedToken}`;
+    const resetURL = `${clientUrl}/reset-password/${encodedToken}`;
 
     let emailSent = true;
     try {
@@ -55,11 +55,11 @@ export const forgotPassword = async (req, res) => {
     return res.json({
       success: true,
       message: emailSent
-        ? "If that email exists, a reset link has been sent"
+        ? "Check your email for a reset link."
         : "Reset email could not be sent. Use the reset link returned by the API.",
       emailSent,
       resetUrl: emailSent ? undefined : resetURL,
-      resetToken: emailSent ? resetToken : resetToken,
+      resetToken: resetToken,
     });
   } catch (error) {
     return res.status(500).json({
