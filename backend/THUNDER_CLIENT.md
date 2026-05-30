@@ -33,7 +33,9 @@ Base URL: `http://localhost:5000` (use your `PORT` from `backend/.env`)
 ## 4. Google OAuth
 - Browser: **GET** `/auth/google?role=client` (or `freelancer`)
 - Callback redirects to frontend with `?token=JWT`
-- Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL`
+- Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL` or `BACKEND_URL`
+- On production, make sure Google Console has the exact callback URI:
+  - `https://YOUR_BACKEND_DOMAIN/auth/google/callback`
 
 ## 5. Email verification
 - **GET** `/auth/verify-email/:token`

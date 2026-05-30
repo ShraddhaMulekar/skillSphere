@@ -5,6 +5,11 @@ import { PUBLIC_REGISTER_ROLES, ROLES } from "../constants/roles.js";
 import crypto from "crypto";
 
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+const backendBaseUrl =
+  process.env.BACKEND_URL ||
+  process.env.RENDER_EXTERNAL_URL ||
+  process.env.PUBLIC_URL ||
+  `http://localhost:${process.env.PORT || 5000}`;
 
 const parseOAuthState = (state) => {
   if (!state) return { role: ROLES.CLIENT };
@@ -29,7 +34,7 @@ export const configurePassport = () => {
 
   const callbackURL =
     process.env.GOOGLE_CALLBACK_URL ||
-    `http://localhost:${process.env.PORT || 5000}/auth/google/callback`;
+    `${backendBaseUrl.replace(/\/$/, "")}/auth/google/callback`;
 
   passport.use(
     new GoogleStrategy(
@@ -88,6 +93,9 @@ export const configurePassport = () => {
 };
 
 export const googleFailureRedirect = `${clientUrl}/login?error=google_auth_failed`;
+
+export const googleFailureRedirectWithReason = (reason) =>
+  `${clientUrl}/login?error=${encodeURIComponent(reason)}`;
 
 export const googleSuccessRedirect = (token) =>
   `${clientUrl}/auth/google/callback?token=${encodeURIComponent(token)}`;

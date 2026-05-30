@@ -3,15 +3,15 @@ import { PUBLIC_REGISTER_ROLES, ROLES } from "../../constants/roles.js";
 import { generateToken } from "../../utils/generateToken.js";
 import {
   googleFailureRedirect,
+  googleFailureRedirectWithReason,
   googleSuccessRedirect,
 } from "../../config/passport.js";
 
 export const googleAuth = (req, res, next) => {
-  if (!process.env.GOOGLE_CLIENT_ID) {
-    return res.status(503).json({
-      success: false,
-      message: "Google OAuth is not configured on the server",
-    });
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return res.redirect(
+      googleFailureRedirectWithReason("google_oauth_not_configured"),
+    );
   }
 
   const role = PUBLIC_REGISTER_ROLES.includes(req.query.role)

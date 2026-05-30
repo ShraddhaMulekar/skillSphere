@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { useDispatch } from "react-redux";
 import AuthLayout from "../components/layout/AuthLayout";
 import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
@@ -9,7 +8,6 @@ import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Alert from "../components/ui/Alert";
 import { registerUser } from "../api/authApi";
-import { setCredentials } from "../store/authSlice";
 import { useNavigate, useLocation } from "react-router-dom";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 
@@ -21,6 +19,7 @@ const roleOptions = [
 
 export default function Register() {
   const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -30,6 +29,13 @@ export default function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [verificationUrl, setVerificationUrl] = useState("");
+  const visibleError =
+    error ||
+    (searchParams.get("error") === "google_auth_failed"
+      ? "Google sign-in failed. Please try again."
+      : searchParams.get("error") === "google_oauth_not_configured"
+        ? "Google sign-in is not configured on this server yet."
+        : "");
 
   const navigate = useNavigate();
   const mutation = useMutation({
@@ -62,7 +68,7 @@ export default function Register() {
       subtitle="Connect with hyperlocal talent"
     >
       <Card>
-        <Alert type="error" message={error} />
+        <Alert type="error" message={visibleError} />
         <Alert type="success" message={success} />
         {success && (
           <div className="mb-4 rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-3 text-sm text-cyan-100">

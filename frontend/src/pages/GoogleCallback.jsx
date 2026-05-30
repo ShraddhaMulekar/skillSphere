@@ -8,6 +8,7 @@ import Loader from "../components/ui/Loader";
 export default function GoogleCallback() {
   const [searchParams] = useSearchParams();
   const [error, setError] = useState("");
+  const [resolved, setResolved] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = searchParams.get("token");
@@ -23,7 +24,11 @@ export default function GoogleCallback() {
         navigate("/dashboard", { replace: true });
       })
       .catch(() => {
+        localStorage.removeItem("token");
         setError("Could not load your account. Try signing in again.");
+      })
+      .finally(() => {
+        setResolved(true);
       });
   }, [token, dispatch, navigate]);
 
@@ -40,5 +45,5 @@ export default function GoogleCallback() {
     );
   }
 
-  return <Loader text="Completing Google sign-in..." />;
+  return token && !resolved && !error ? <Loader text="Completing Google sign-in..." /> : null;
 }

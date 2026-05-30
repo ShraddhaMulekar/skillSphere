@@ -21,6 +21,8 @@ export default function Login() {
     error ||
     (searchParams.get("error") === "google_auth_failed"
       ? "Google sign-in failed. Please try again."
+      : searchParams.get("error") === "google_oauth_not_configured"
+        ? "Google sign-in is not configured on this server yet."
       : "");
 
   const mutation = useMutation({
