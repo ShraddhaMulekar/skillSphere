@@ -13,6 +13,17 @@ export const registerController = async (req, res) => {
   try {
     const { name, email, password, role } = req.body || {};
 
+    const regexPass =
+      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;"'<>,.?/\\|]).{8,}$/;
+
+    if (!regexPass.test(password)) {
+      return res.json({
+        message:
+          "Password must contain at least one letter, one number, one special character, and be at most 8 characters long.",
+        success: false,
+      });
+    }
+
     if (!name || !email || !password || !role) {
       return res
         .status(400)
@@ -34,17 +45,21 @@ export const registerController = async (req, res) => {
       });
     }
 
-    const existingUser = await UserModel.findOne({ email: email.toLowerCase() });
+    const existingUser = await UserModel.findOne({
+      email: email.toLowerCase(),
+    });
     if (existingUser) {
       return res
         .status(400)
         .json({ success: false, message: "User already exists" });
     }
-    
+
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
+
     const newUser = await UserModel.create({
       name,
       email: email.toLowerCase(),
@@ -53,16 +68,12 @@ export const registerController = async (req, res) => {
       authProvider: "local",
       emailVerificationToken: verificationToken,
       emailVerificationExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      verificationCode,                                                   
-      verificationCodeExpire: new Date(Date.now() + 10 * 60 * 1000),   
+      verificationCode,
+      verificationCodeExpire: new Date(Date.now() + 10 * 60 * 1000),
     });
 
     const verifyURL = `${clientUrl}/verify-email/${verificationToken}`;
     const apiVerifyURL = `http://localhost:${process.env.PORT || 5000}/auth/verify-email/${verificationToken}`;
-
-    // newUser.verificationCode = verificationCode;
-    // newUser.verificationCodeExpire = new Date(Date.now() + 10 * 60 * 1000);
-    // await newUser.save();
 
     let emailSent = true;
     try {
@@ -83,7 +94,10 @@ export const registerController = async (req, res) => {
       });
     } catch (emailError) {
       emailSent = false;
-      console.warn("Verification email failed during registration:", emailError.message);
+      console.warn(
+        "Verification email failed during registration:",
+        emailError.message,
+      );
     }
 
     return sendAuthSuccess(
@@ -107,4 +121,4 @@ export const registerController = async (req, res) => {
       error: error.message,
     });
   }
-}
+};
