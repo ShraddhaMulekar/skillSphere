@@ -34,6 +34,7 @@ export const configurePassport = () => {
 
   const callbackURL =
     process.env.GOOGLE_CALLBACK_URL ||
+    "http://localhost:5000/auth/google/callback" ||
     `${backendBaseUrl.replace(/\/$/, "")}/auth/google/callback`;
 
   passport.use(

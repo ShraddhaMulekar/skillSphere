@@ -24,6 +24,12 @@ const BLOCKED_DOMAINS = [
   "fake.com",
   "fake.in",
   "localhost",
+  "gmail.co",
+  "gamil.com",
+  "gmial.com",
+  "yaho.com",
+  "hotmial.com",
+  "outlok.com",
 ];
 
 const DUMMY_LOCAL_PARTS = [
@@ -41,23 +47,24 @@ const DUMMY_LOCAL_PARTS = [
 ];
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const INVALID_EMAIL_MESSAGE = "email id not found or valid";
 
 export const getEmailValidationError = (email) => {
   const normalized = String(email || "").trim().toLowerCase();
 
-  if (!normalized) return "Email is required";
-  if (!EMAIL_REGEX.test(normalized)) return "Please enter a valid email address";
+  if (!normalized) return INVALID_EMAIL_MESSAGE;
+  if (!EMAIL_REGEX.test(normalized)) return INVALID_EMAIL_MESSAGE;
 
   const [localPart, domain] = normalized.split("@");
-  if (!localPart || !domain) return "Please enter a valid email address";
+  if (!localPart || !domain) return INVALID_EMAIL_MESSAGE;
   if (DISPOSABLE_DOMAINS.includes(domain)) {
-    return "Disposable email addresses are not allowed. Please use a real email address.";
+    return INVALID_EMAIL_MESSAGE;
   }
   if (BLOCKED_DOMAINS.includes(domain)) {
-    return "Dummy or test email domains are not allowed. Please use a real email address.";
+    return INVALID_EMAIL_MESSAGE;
   }
   if (DUMMY_LOCAL_PARTS.includes(localPart) || /^test\d*$/.test(localPart) || /^dummy\d*$/.test(localPart)) {
-    return "Dummy email addresses are not allowed. Please use your real email address.";
+    return INVALID_EMAIL_MESSAGE;
   }
 
   return "";

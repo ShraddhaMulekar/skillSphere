@@ -8,18 +8,31 @@ import { getEmailValidationError } from "../../utils/emailValidator.js";
 
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 const SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUND) || 10;
+const PASSWORD_RULE_MESSAGE =
+  "Password must contain at least one letter, one number, one special character, and be at most 8 characters long.";
+
+const isValidPassword = (password = "") => {
+  const regexPass =
+    /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;"'<>,.?/\\|]).{1,8}$/;
+  return regexPass.test(password);
+};
 
 export const registerController = async (req, res) => {
   try {
     const { name, email, password, role } = req.body || {};
+    const normalizedEmail = String(email || "").trim().toLowerCase();
 
-    const regexPass =
-      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;"'<>,.?/\\|]).{8,}$/;
+    const emailValidationError = getEmailValidationError(normalizedEmail);
+    if (emailValidationError) {
+      return res.status(400).json({
+        success: false,
+        message: emailValidationError,
+      });
+    }
 
-    if (!regexPass.test(password)) {
-      return res.json({
-        message:
-          "Password must contain at least one letter, one number, one special character, and be at most 8 characters long.",
+    if (!isValidPassword(password)) {
+      return res.status(400).json({
+        message: PASSWORD_RULE_MESSAGE,
         success: false,
       });
     }
@@ -30,14 +43,6 @@ export const registerController = async (req, res) => {
         .json({ success: false, message: "All fields are required" });
     }
 
-    const emailValidationError = getEmailValidationError(email);
-    if (emailValidationError) {
-      return res.status(400).json({
-        success: false,
-        message: emailValidationError,
-      });
-    }
-
     if (!PUBLIC_REGISTER_ROLES.includes(role)) {
       return res.status(400).json({
         success: false,
@@ -45,40 +50,56 @@ export const registerController = async (req, res) => {
       });
     }
 
-    const existingUser = await UserModel.findOne({
-      email: email.toLowerCase(),
-    });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
-    }
+    const existingUser = await UserModel.findOne({ email: normalizedEmail }).select("+password");
 
+    let newUser = existingUser;
+    let createdFreshAccount = false;
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const verificationCode = Math.floor(
-      100000 + Math.random() * 900000,
-    ).toString();
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const newUser = await UserModel.create({
-      name,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      role,
-      authProvider: "local",
-      emailVerificationToken: verificationToken,
-      emailVerificationExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      verificationCode,
-      verificationCodeExpire: new Date(Date.now() + 10 * 60 * 1000),
-    });
+    if (existingUser) {
+      if (existingUser.isVerified) {
+        return res.status(400).json({
+          success: false,
+          message: existingUser.authProvider === "google" && !existingUser.password
+            ? "This email uses Google sign-in. Please continue with Google."
+            : "User already exists",
+        });
+      }
+
+      existingUser.name = name;
+      existingUser.password = hashedPassword;
+      existingUser.role = role;
+      existingUser.authProvider = "local";
+      existingUser.emailVerificationToken = verificationToken;
+      existingUser.emailVerificationExpire = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      existingUser.verificationCode = verificationCode;
+      existingUser.verificationCodeExpire = new Date(Date.now() + 10 * 60 * 1000);
+      await existingUser.save();
+    } else {
+      newUser = await UserModel.create({
+        name,
+        email: normalizedEmail,
+        password: hashedPassword,
+        role,
+        authProvider: "local",
+        emailVerificationToken: verificationToken,
+        emailVerificationExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        verificationCode,
+        verificationCodeExpire: new Date(Date.now() + 10 * 60 * 1000),
+      });
+      createdFreshAccount = true;
+    }
 
     const verifyURL = `${clientUrl}/verify-email/${verificationToken}`;
     const apiVerifyURL = `http://localhost:${process.env.PORT || 5000}/auth/verify-email/${verificationToken}`;
 
     let emailSent = true;
+    let emailErrorMessage = "";
     try {
       await sendEmail({
-        to: newUser.email,
+        to: normalizedEmail,
         subject: "Verify your SkillSphere account",
         html: `<h2>Hi ${name}!</h2>
                <p>Your 6-digit verification code is: 
@@ -94,6 +115,7 @@ export const registerController = async (req, res) => {
       });
     } catch (emailError) {
       emailSent = false;
+      emailErrorMessage = emailError.message;
       console.warn(
         "Verification email failed during registration:",
         emailError.message,
@@ -105,16 +127,22 @@ export const registerController = async (req, res) => {
       newUser,
       201,
       emailSent
-        ? "Registration successful. Please verify your email."
-        : "Registration successful. Email could not be sent, so use the verification link returned by the API.",
+        ? createdFreshAccount
+          ? "Registration successful. Please verify your email."
+          : "Account updated. Please verify your email."
+        : createdFreshAccount
+          ? "Registration successful. Email could not be sent, so use the verification link returned by the API."
+          : "Account updated. Email could not be sent, so use the verification link returned by the API.",
       {
         emailSent,
+        emailErrorMessage,
         verificationUrl: verifyURL,
         verificationCode,
         apiVerificationUrl: apiVerifyURL,
       },
     );
   } catch (error) {
+    console.error("Error in registerController:", error);
     return res.status(500).json({
       success: false,
       message: "Error occurred while registering user",

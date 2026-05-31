@@ -829,3 +829,429 @@ Password reset
 verificationCode: N/A
 ========================================
 
+
+========================================
+[2026-05-30T12:40:45.418Z] EMAIL SENT
+To: s@s.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/de35d5419ab3eea03427a8b733120184d5958f9f658bd01596d5d05a2bfa937e
+  - http://localhost:5000/auth/verify-email/de35d5419ab3eea03427a8b733120184d5958f9f658bd01596d5d05a2bfa937e
+---------------------------
+Body:
+Hi shraddha! 
+                Your 6-digit verification code is: 
+                  
+                   747743
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/de35d5419ab3eea03427a8b733120184d5958f9f658bd01596d5d05a2bfa937e
+verificationCode: 747743
+========================================
+
+
+========================================
+[2026-05-30T12:44:14.933Z] EMAIL SENT
+To: shraddha@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/ea380b9b7bafd2d2d6448a7ba48ba6766b386bdb00f4785115443fbacbd24f36
+  - http://localhost:5000/auth/verify-email/ea380b9b7bafd2d2d6448a7ba48ba6766b386bdb00f4785115443fbacbd24f36
+---------------------------
+Body:
+Hi SHRADDHA MULEKAR! 
+                Your 6-digit verification code is: 
+                  
+                   480626
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/ea380b9b7bafd2d2d6448a7ba48ba6766b386bdb00f4785115443fbacbd24f36
+verificationCode: 480626
+========================================
+
+
+========================================
+[2026-05-30T13:05:52.851Z] EMAIL SENT
+To: shraddha@gmail.co
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/3ef79558d40271bcf54d250a5cd353f64f9fa1d7d383b6748d5b0c99e51d594a
+  - http://localhost:5000/auth/verify-email/3ef79558d40271bcf54d250a5cd353f64f9fa1d7d383b6748d5b0c99e51d594a
+---------------------------
+Body:
+Hi shraddha! 
+                Your 6-digit verification code is: 
+                  
+                   978711
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/3ef79558d40271bcf54d250a5cd353f64f9fa1d7d383b6748d5b0c99e51d594a
+verificationCode: 978711
+========================================
+
+
+========================================
+[2026-05-30T13:08:17.844Z] EMAIL SENT
+To: mulekarshraddha@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/73e30fbc8150a0fccc213a4a26e060f0465c1f88ef8aaa836185acf7b02a338c
+  - http://localhost:5000/auth/verify-email/73e30fbc8150a0fccc213a4a26e060f0465c1f88ef8aaa836185acf7b02a338c
+---------------------------
+Body:
+Hi SHRADDHA MULEKAR! 
+                Your 6-digit verification code is: 
+                  
+                   367446
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/73e30fbc8150a0fccc213a4a26e060f0465c1f88ef8aaa836185acf7b02a338c
+verificationCode: 367446
+========================================
+
+
+========================================
+[2026-05-30T13:13:50.444Z] EMAIL SENT
+To: mulekarshraddha@gmail.com
+Subject: Reset your SkillSphere password
+Links Found:
+  - http://localhost:5173/reset-password/b67d3d49dc32b54c1592f37ef4de2d44402e5e849f44bee30b599fa484a7458c
+---------------------------
+Body:
+Password reset 
+                Hi SHRADDHA MULEKAR, 
+                Click the link below to reset your password (expires in 10 minutes): 
+                http://localhost:5173/reset-password/b67d3d49dc32b54c1592f37ef4de2d44402e5e849f44bee30b599fa484a7458c
+verificationCode: N/A
+========================================
+
+
+========================================
+[2026-05-30T14:52:16.826Z] EMAIL SENT
+To: mulekarshraddha@gmail.com
+Subject: Your SkillSphere 2FA setup code
+
+---------------------------
+Body:
+Hi SHRADDHA MULEKAR! 
+     Your 6-digit SkillSphere code is: 
+     332935 
+     This code expires in 10 minutes.
+verificationCode: 332935
+========================================
+
+
+========================================
+[2026-05-30T15:05:49.334Z] EMAIL SENT
+To: shyam@gmail.co
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/7bf42c98b077f9ea167f4199bbcb107b3ab57ec84d7116f984ae84ee85f7e9ed
+  - http://localhost:5000/auth/verify-email/7bf42c98b077f9ea167f4199bbcb107b3ab57ec84d7116f984ae84ee85f7e9ed
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is: 
+                  
+                   765194
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/7bf42c98b077f9ea167f4199bbcb107b3ab57ec84d7116f984ae84ee85f7e9ed
+verificationCode: 765194
+========================================
+
+
+========================================
+[2026-05-30T15:09:26.062Z] EMAIL SENT
+To: shyamal@gmail.co
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/1ee9954d7d9f60d4c72743d3daf829d927f85a94214213714629f5d173cacdae
+  - http://localhost:5000/auth/verify-email/1ee9954d7d9f60d4c72743d3daf829d927f85a94214213714629f5d173cacdae
+---------------------------
+Body:
+Hi shyamal! 
+                Your 6-digit verification code is: 
+                  
+                   528098
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/1ee9954d7d9f60d4c72743d3daf829d927f85a94214213714629f5d173cacdae
+verificationCode: 528098
+========================================
+
+
+========================================
+[2026-05-30T15:17:40.900Z] EMAIL SENT
+To: shraddha@gmail.co
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/40a9cc36005db0143fd3ef4884b0f00153d9f9a42559911ae07d8d968feaba13
+  - http://localhost:5000/auth/verify-email/40a9cc36005db0143fd3ef4884b0f00153d9f9a42559911ae07d8d968feaba13
+---------------------------
+Body:
+Hi shraddha! 
+                Your 6-digit verification code is: 
+                  
+                   725338
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/40a9cc36005db0143fd3ef4884b0f00153d9f9a42559911ae07d8d968feaba13
+verificationCode: 725338
+========================================
+
+
+========================================
+[2026-05-30T15:19:23.061Z] EMAIL SENT
+To: shraddha@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/de58d96fb891cdf7244b07446f4b524b2a22d10dc879889b5d376e1fe884f54f
+  - http://localhost:5000/auth/verify-email/de58d96fb891cdf7244b07446f4b524b2a22d10dc879889b5d376e1fe884f54f
+---------------------------
+Body:
+Hi shraddha! 
+                Your 6-digit verification code is: 
+                  
+                   935779
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/de58d96fb891cdf7244b07446f4b524b2a22d10dc879889b5d376e1fe884f54f
+verificationCode: 935779
+========================================
+
+
+========================================
+[2026-05-30T16:15:19.497Z] EMAIL SENT
+To: shyama102938@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/8bb24ab014e2851b543fac8ac6784e95b5cc88440b0ac0f1645a04398efb7b14
+  - http://localhost:5000/auth/verify-email/8bb24ab014e2851b543fac8ac6784e95b5cc88440b0ac0f1645a04398efb7b14
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is: 
+                  
+                   487217
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/8bb24ab014e2851b543fac8ac6784e95b5cc88440b0ac0f1645a04398efb7b14
+verificationCode: 487217
+========================================
+
+
+========================================
+[2026-05-30T16:23:33.328Z] EMAIL SENT
+To: shraddhaachs@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/5528afbf16d033cca0638e18b6c82d8d0c3d76d4017d0a96a59def4f41fcb3d0
+  - http://localhost:5000/auth/verify-email/5528afbf16d033cca0638e18b6c82d8d0c3d76d4017d0a96a59def4f41fcb3d0
+---------------------------
+Body:
+Hi SM! 
+                Your 6-digit verification code is: 
+                  
+                   419719
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/5528afbf16d033cca0638e18b6c82d8d0c3d76d4017d0a96a59def4f41fcb3d0
+verificationCode: 419719
+========================================
+
+
+========================================
+[2026-05-30T16:28:49.327Z] EMAIL SENT
+To: shraddhaachs@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/e17eb2f0c2aaf3d888128c7b8a9afdd3180d6e9bea6713b02aa14707bde1d8e3
+  - http://localhost:5000/auth/verify-email/e17eb2f0c2aaf3d888128c7b8a9afdd3180d6e9bea6713b02aa14707bde1d8e3
+---------------------------
+Body:
+Hi SM! 
+                Your 6-digit verification code is: 
+                  
+                   675477
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/e17eb2f0c2aaf3d888128c7b8a9afdd3180d6e9bea6713b02aa14707bde1d8e3
+verificationCode: 675477
+========================================
+
+
+========================================
+[2026-05-30T16:28:53.646Z] EMAIL SENT
+To: shraddhaachs@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/86c63fd3b7e214cea95913218b78a749f2e1a1b237273efc9c959c7bd1b8c01b
+  - http://localhost:5000/auth/verify-email/86c63fd3b7e214cea95913218b78a749f2e1a1b237273efc9c959c7bd1b8c01b
+---------------------------
+Body:
+Hi SM! 
+                Your 6-digit verification code is: 
+                  
+                   167228
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/86c63fd3b7e214cea95913218b78a749f2e1a1b237273efc9c959c7bd1b8c01b
+verificationCode: 167228
+========================================
+
+
+========================================
+[2026-05-30T16:39:45.495Z] EMAIL SENT
+To: mulekarshraddha@gmail.com
+Subject: Your SkillSphere sign-in code
+
+---------------------------
+Body:
+Hi SHRADDHA MULEKAR!  Your 6-digit sign-in code is:  472992  This code expires in 10 minutes.
+verificationCode: 472992
+========================================
+
+
+========================================
+[2026-05-31T06:03:48.568Z] EMAIL SENT
+To: shraddha150198@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/e3eb5df04d4de298aff9c18724e9319db48032990af5f50ce4ee03e23652d866
+  - http://localhost:5000/auth/verify-email/e3eb5df04d4de298aff9c18724e9319db48032990af5f50ce4ee03e23652d866
+---------------------------
+Body:
+Hi shraddha! 
+                Your 6-digit verification code is: 
+                  
+                   573274
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/e3eb5df04d4de298aff9c18724e9319db48032990af5f50ce4ee03e23652d866
+verificationCode: 573274
+========================================
+
+
+========================================
+[2026-05-31T06:06:00.350Z] EMAIL SENT
+To: shyamal@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/be9c8d844b93adae2fc2abde7acc6fb91f1e67e61af15d28e87bc29693038299
+  - http://localhost:5000/auth/verify-email/be9c8d844b93adae2fc2abde7acc6fb91f1e67e61af15d28e87bc29693038299
+---------------------------
+Body:
+Hi shyamal! 
+                Your 6-digit verification code is: 
+                  
+                   196929
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/be9c8d844b93adae2fc2abde7acc6fb91f1e67e61af15d28e87bc29693038299
+verificationCode: 196929
+========================================
+
+
+========================================
+[2026-05-31T06:10:52.262Z] EMAIL SENT
+To: shyam@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/517d074c5bfdaa1ab5a1b7da32831aaf6bcd5f293e3438b7e742159d799e3c17
+  - http://localhost:5000/auth/verify-email/517d074c5bfdaa1ab5a1b7da32831aaf6bcd5f293e3438b7e742159d799e3c17
+---------------------------
+Body:
+Hi shyam! 
+                Your 6-digit verification code is: 
+                  
+                   819021
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/517d074c5bfdaa1ab5a1b7da32831aaf6bcd5f293e3438b7e742159d799e3c17
+verificationCode: 819021
+========================================
+
+
+========================================
+[2026-05-31T07:36:43.778Z] EMAIL SENT
+To: s@gmail.com
+Subject: Verify your SkillSphere account
+Links Found:
+  - http://localhost:5173/verify-email/5a00f109532b7244a02956be735e2eaa99b6c89385e04f30d0c0a583a459742d
+  - http://localhost:5000/auth/verify-email/5a00f109532b7244a02956be735e2eaa99b6c89385e04f30d0c0a583a459742d
+---------------------------
+Body:
+Hi s! 
+                Your 6-digit verification code is: 
+                  
+                   696225
+                  
+                
+                Click below to verify your email automatically: 
+                Verify on App 
+                Or use API link for Thunder Client: 
+                http://localhost:5000/auth/verify-email/5a00f109532b7244a02956be735e2eaa99b6c89385e04f30d0c0a583a459742d
+verificationCode: 696225
+========================================
+
+
+========================================
+[2026-05-31T16:13:21.833Z] EMAIL SENT
+To: shraddha150198@gmail.com
+Subject: Your SkillSphere 2FA setup code
+
+---------------------------
+Body:
+Hi Shraddha Mulekar! 
+     Your 6-digit SkillSphere code is: 
+     693902 
+     This code expires in 10 minutes.
+verificationCode: 693902
+========================================
+

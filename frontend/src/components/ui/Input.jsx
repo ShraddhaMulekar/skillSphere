@@ -6,6 +6,7 @@ export default function Input({
   onChange,
   placeholder,
   required = false,
+  maxLength,
   className = "",
 }) {
   return (
@@ -26,6 +27,7 @@ export default function Input({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
+        maxLength={maxLength}
         className="w-full px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all duration-300"
       />
     </div>

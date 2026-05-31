@@ -2,6 +2,9 @@ import { UserModel } from "../../models/UserModel.js";
 import bcrypt from "bcryptjs";
 import { sendAuthSuccess, toPublicUser } from "../../utils/authResponse.js";
 import { issue2FATempToken } from "./twoFactorController.js";
+import { sendEmail } from "../../utils/sendEmail.js";
+
+const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 export const loginController = async (req, res) => {
   try {
@@ -28,6 +31,14 @@ export const loginController = async (req, res) => {
       });
     }
 
+    if (user.authProvider === "local" && !user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email before signing in.",
+        code: "EMAIL_NOT_VERIFIED",
+      });
+    }
+
     if (user.authProvider === "google" && !user.password) {
       return res.status(401).json({
         success: false,
@@ -44,6 +55,18 @@ export const loginController = async (req, res) => {
     }
 
     if (user.twoFactorEnabled) {
+      const otp = generateOtp();
+      user.twoFactorOtpCode = otp;
+      user.twoFactorOtpExpire = new Date(Date.now() + 10 * 60 * 1000);
+      await user.save({ validateBeforeSave: false });
+
+      await sendEmail({
+        to: user.email,
+        subject: "Your SkillSphere sign-in code",
+        html: `<h2>Hi ${user.name}!</h2><p>Your 6-digit sign-in code is:</p><p style="font-size:24px;letter-spacing:4px;font-weight:700;">${otp}</p><p>This code expires in 10 minutes.</p>`,
+        verificationCode: otp,
+      });
+
       const tempToken = issue2FATempToken(user);
       return res.status(200).json({
         success: true,

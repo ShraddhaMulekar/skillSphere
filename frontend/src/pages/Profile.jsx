@@ -171,21 +171,23 @@ export default function Profile() {
             onChange={handleChange}
             placeholder="https://..."
           />
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
-              Account Role (Switch to test other views like Admin)
-            </label>
-            <select
-              name="role"
-              value={profile.role}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 sm:py-3 rounded-xl bg-slate-900/50 border border-white/10 text-white text-sm sm:text-base focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-            >
-              <option value="client">Client</option>
-              <option value="freelancer">Freelancer</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
+          {user?.role === "admin" ? (
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                Account Role
+              </label>
+              <select
+                name="role"
+                value={profile.role}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 sm:py-3 rounded-xl bg-slate-900/50 border border-white/10 text-white text-sm sm:text-base focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              >
+                <option value="client">Client</option>
+                <option value="freelancer">Freelancer</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          ) : null}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">
               Bio

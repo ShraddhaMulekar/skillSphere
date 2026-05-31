@@ -22,7 +22,7 @@ export const updateProfile = async (req, res) => {
       role,
     } = req.body;
 
-    if (role && ["client", "freelancer", "admin"].includes(role)) {
+    if (req.user.role === "admin" && role && ["client", "freelancer", "admin"].includes(role)) {
       user.role = role;
     }
 

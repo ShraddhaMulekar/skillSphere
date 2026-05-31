@@ -51,7 +51,7 @@ export default function TwoFactorLogin() {
   return (
     <AuthLayout
       title="Two-Factor Auth"
-      subtitle="Enter the 6-digit code from your authenticator app"
+      subtitle="Enter the 6-digit code sent to your email"
     >
       <Card>
         <Alert type="error" message={error} />
@@ -62,7 +62,7 @@ export default function TwoFactorLogin() {
           }}
         >
           <Input
-            label="Authentication Code"
+            label="Email verification code"
             name="code"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}

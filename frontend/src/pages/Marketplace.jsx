@@ -1,7 +1,8 @@
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getGigs, getTrendingSkills, deleteGig } from "../api/marketplaceApi";
 import Button from "../components/ui/Button";
 import EmptyState from "../components/ui/EmptyState";
@@ -11,12 +12,24 @@ import StatusBadge from "../components/ui/StatusBadge";
 
 export default function Marketplace() {
   const { user } = useSelector((state) => state.auth);
+  const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState({ q: "", skill: "", location: "", status: "open" });
   const queryClient = useQueryClient();
+  const mineOnly = searchParams.get("mine") === "1";
+  const normalizedStatus = searchParams.get("status") || filters.status;
+
+  const effectiveFilters = useMemo(
+    () => ({
+      ...filters,
+      status: normalizedStatus,
+      mine: mineOnly ? "1" : "",
+    }),
+    [filters, mineOnly, normalizedStatus],
+  );
 
   const gigsQuery = useQuery({
-    queryKey: ["gigs", filters],
-    queryFn: async () => (await getGigs(filters)).data.gigs,
+    queryKey: ["gigs", effectiveFilters],
+    queryFn: async () => (await getGigs(effectiveFilters)).data.gigs,
   });
   const trendsQuery = useQuery({
     queryKey: ["trending-skills"],

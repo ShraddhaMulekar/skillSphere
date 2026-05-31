@@ -8,15 +8,13 @@ import {
   setup2FA,
   enable2FA,
   disable2FA,
-  resendVerification,
 } from "../../api/authApi";
 import { updateUser } from "../../store/authSlice";
 
 export default function SecuritySettings() {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const [qrCode, setQrCode] = useState("");
-  const [manualEntry, setManualEntry] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -25,9 +23,8 @@ export default function SecuritySettings() {
   const setupMutation = useMutation({
     mutationFn: setup2FA,
     onSuccess: (res) => {
-      setQrCode(res.data.qrCode);
-      setManualEntry(res.data.manualEntry);
-      setMessage("Scan the QR code with Google Authenticator or similar app.");
+      setOtpSent(true);
+      setMessage(res.data.message || "A 6-digit code has been sent to your email.");
       setError("");
     },
     onError: (err) => {
@@ -39,7 +36,7 @@ export default function SecuritySettings() {
     mutationFn: () => enable2FA(code),
     onSuccess: () => {
       dispatch(updateUser({ twoFactorEnabled: true }));
-      setQrCode("");
+      setOtpSent(false);
       setCode("");
       setMessage("Two-factor authentication is now enabled.");
       setError("");
@@ -51,10 +48,17 @@ export default function SecuritySettings() {
 
   const disableMutation = useMutation({
     mutationFn: () => disable2FA({ password, token: code }),
-    onSuccess: () => {
+    onSuccess: (res) => {
+      if (res.data?.otpSent) {
+        setOtpSent(true);
+        setMessage(res.data.message || "A disable code was sent to your email.");
+        setError("");
+        return;
+      }
       dispatch(updateUser({ twoFactorEnabled: false }));
       setPassword("");
       setCode("");
+      setOtpSent(false);
       setMessage("Two-factor authentication disabled.");
       setError("");
     },
@@ -63,42 +67,15 @@ export default function SecuritySettings() {
     },
   });
 
-  const resendMutation = useMutation({
-    mutationFn: resendVerification,
-    onSuccess: (res) => {
-      setMessage(res.data.message);
-      setError("");
-    },
-    onError: (err) => {
-      setError(err.response?.data?.message || "Failed to send email");
-    },
-  });
-
   return (
     <div className="mt-8 pt-8 border-t border-white/10">
       <h3 className="text-lg font-semibold text-white mb-1">Security</h3>
       <p className="text-slate-400 text-sm mb-4">
-        Email verification, 2FA, and account protection
+        Email verification, authenticator-based 2FA, and account protection
       </p>
 
       <Alert type="success" message={message} />
       <Alert type="error" message={error} />
-
-      {!user?.isVerified && (
-        <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-          <p className="text-amber-200 text-sm mb-3">
-            Your email is not verified. Some features require verification.
-          </p>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => resendMutation.mutate()}
-            disabled={resendMutation.isPending}
-          >
-            {resendMutation.isPending ? "Sending..." : "Resend verification email"}
-          </Button>
-        </div>
-      )}
 
       <div className="space-y-4">
         <p className="text-slate-300 text-sm">
@@ -110,34 +87,29 @@ export default function SecuritySettings() {
 
         {!user?.twoFactorEnabled ? (
           <>
-            {!qrCode && (
+            {!otpSent && (
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => setupMutation.mutate()}
                 disabled={setupMutation.isPending}
               >
-                {setupMutation.isPending ? "Preparing..." : "Set up 2FA"}
+                {setupMutation.isPending ? "Preparing..." : "Send 2FA code"}
               </Button>
             )}
-            {qrCode && (
+            {otpSent && (
               <div className="space-y-4">
-                <img
-                  src={qrCode}
-                  alt="2FA QR code"
-                  className="mx-auto w-48 h-48 rounded-lg bg-white p-2"
-                />
-                <p className="text-xs text-slate-400 break-all text-center">
-                  Manual key: {manualEntry}
-                </p>
                 <Input
-                  label="6-digit code"
+                  label="6-digit code from email"
                   value={code}
                   onChange={(e) =>
                     setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
                   }
                   placeholder="123456"
                 />
+                <p className="text-xs text-slate-400">
+                  Check your email for the 6-digit code. It expires in 10 minutes.
+                </p>
                 <Button
                   type="button"
                   onClick={() => enableMutation.mutate()}
@@ -158,20 +130,23 @@ export default function SecuritySettings() {
               placeholder="Your account password"
             />
             <Input
-              label="Current 2FA code"
+              label="6-digit email code"
               value={code}
               onChange={(e) =>
                 setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
               }
               placeholder="123456"
             />
+            <p className="text-xs text-slate-400">
+              Click once to send a disable code to your email, then enter the code and click again.
+            </p>
             <Button
               type="button"
               variant="danger"
               onClick={() => disableMutation.mutate()}
               disabled={disableMutation.isPending}
             >
-              {disableMutation.isPending ? "Disabling..." : "Disable 2FA"}
+              {disableMutation.isPending ? "Processing..." : "Disable 2FA"}
             </Button>
           </div>
         )}

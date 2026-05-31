@@ -1,7 +1,7 @@
 import { getGoogleAuthUrl } from "../../api/authApi";
 import Button from "../ui/Button";
 
-export default function GoogleSignInButton({ role = "client", label = "Continue with Google" }) {
+export default function GoogleSignInButton({ role = "freelancer", label = "Continue with Google" }) {
   const handleGoogle = () => {
     window.location.href = getGoogleAuthUrl(role);
   };

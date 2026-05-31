@@ -13,6 +13,12 @@ const API_URL =
     ? window.location.origin
     : "http://localhost:5000");
 
+const AUTH_API_URL =
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  runtimeApiUrl ||
+  "http://localhost:5000";
+
 export const registerUser = (data) => api.post("/auth/register", data);
 export const loginUser = (data) => api.post("/auth/login", data);
 export const verify2FALogin = (data) => api.post("/auth/verify-2fa", data);
@@ -29,4 +35,4 @@ export const enable2FA = (token) => api.post("/auth/2fa/enable", { token });
 export const disable2FA = (data) => api.post("/auth/2fa/disable", data);
 
 export const getGoogleAuthUrl = (role = "client") =>
-  `${API_URL}/auth/google?role=${role}`;
+  `${AUTH_API_URL}/auth/google?role=${encodeURIComponent(role)}`;

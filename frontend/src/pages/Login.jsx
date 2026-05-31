@@ -38,6 +38,11 @@ export default function Login() {
       navigate("/dashboard");
     },
     onError: (err) => {
+      const code = err.response?.data?.code;
+      if (code === "EMAIL_NOT_VERIFIED") {
+        navigate("/verify-email", { state: { email: form.email } });
+        return;
+      }
       if (!err.response) {
         setError(
           "Cannot reach server. Start backend (npm start) and check VITE_API_URL matches its PORT.",

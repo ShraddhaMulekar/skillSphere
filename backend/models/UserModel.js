@@ -29,8 +29,8 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      minLength: [6, "Password must be at least 6 characters long"],
       select: false,
+      limit: 8,
     },
     googleId: {
       type: String,
@@ -84,6 +84,8 @@ const userSchema = new mongoose.Schema(
     },
     verificationCode: String,
     verificationCodeExpire: Date,
+    twoFactorOtpCode: String,
+    twoFactorOtpExpire: Date,
     isSuspended: {
       type: Boolean,
       default: false,

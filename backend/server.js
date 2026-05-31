@@ -18,9 +18,14 @@ configurePassport();
 const app = express();
 const port = process.env.PORT || 8080;
 const server = createServer(app);
+const allowedOrigins = new Set([
+  process.env.CLIENT_URL || "http://localhost:5173",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+]);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: Array.from(allowedOrigins),
     credentials: true,
   }
 });
@@ -29,7 +34,7 @@ app.use(helmet());
 app.use(passport.initialize());
 app.use(express.json());
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  origin: Array.from(allowedOrigins),
   credentials: true,
 }));
 
@@ -122,11 +127,6 @@ io.on("connection", (socket) => {
   socket.on('call_answer', ({ to, answer }) => {
     const target = onlineUsers.get(String(to));
     if (target) io.to(target).emit('call_answer', { answer });
-  });
-
-  socket.on('call_offer', ({ to, offer }) => {
-    const target = onlineUsers.get(String(to));
-    if (target) io.to(target).emit('call_offer', { offer });
   });
 
   socket.on("disconnect", () => {

@@ -57,10 +57,13 @@ export const createGig = async (req, res) => {
 
 export const listGigs = async (req, res) => {
   try {
-    const { q, skill, location, minBudget, maxBudget, status = "open" } = req.query;
+    const { q, skill, location, minBudget, maxBudget, status = "open", mine } = req.query;
     const filter = {};
 
     if (status !== "all") filter.status = status;
+    if (mine === "1" && (req.user.role === ROLES.CLIENT || req.user.role === ROLES.ADMIN)) {
+      filter.client = req.user._id;
+    }
     if (q) filter.$text = { $search: q };
     if (skill) filter.skills = skill.toLowerCase();
     if (location) filter.location = new RegExp(location, "i");

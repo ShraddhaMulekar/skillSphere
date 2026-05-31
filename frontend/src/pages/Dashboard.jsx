@@ -70,6 +70,10 @@ export default function Dashboard() {
     freelancer: "Find matched gigs, submit proposals, message clients, and grow your reputation.",
     admin: "Monitor users, payments, disputes, verification, and platform health.",
   };
+  const profileReady =
+    Boolean(latestUser?.name) &&
+    Boolean(latestUser?.email) &&
+    Boolean(latestUser?.role);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in-up">
@@ -129,7 +133,12 @@ export default function Dashboard() {
           <h2 className="text-lg sm:text-xl font-bold text-white mb-2">Role Workspace</h2>
           <p className="text-slate-400 text-sm sm:text-base mb-4">{roleMessages[latestUser?.role]}</p>
           <ul className="space-y-2 sm:space-y-3 text-slate-300 text-sm sm:text-base">
-            <li className="flex items-start gap-2"><span className="text-green-400 shrink-0">Done</span><span>Authentication and profile setup</span></li>
+            <li className="flex items-start gap-2">
+              <span className={profileReady ? "text-green-400 shrink-0" : "text-amber-400 shrink-0"}>
+                {profileReady ? "Done" : "Open"}
+              </span>
+              <span>Authentication and profile setup</span>
+            </li>
             <li className="flex items-start gap-2"><span className={latestUser?.isVerified ? "text-green-400 shrink-0" : "text-amber-400 shrink-0"}>{latestUser?.isVerified ? "Done" : "Open"}</span><span>Email verification</span></li>
             <li className="flex items-start gap-2"><span className="text-cyan-400 shrink-0">Live</span><span>Marketplace, proposals, chat, payments, reviews, disputes, and analytics</span></li>
           </ul>

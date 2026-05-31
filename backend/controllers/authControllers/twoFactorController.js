@@ -1,5 +1,3 @@
-import speakeasy from "speakeasy";
-import qrcode from "qrcode";
 import bcrypt from "bcryptjs";
 import { UserModel } from "../../models/UserModel.js";
 import {
@@ -7,26 +5,48 @@ import {
   verifyTemp2FAToken,
 } from "../../utils/generateToken.js";
 import { sendAuthSuccess } from "../../utils/authResponse.js";
+import { sendEmail } from "../../utils/sendEmail.js";
+
+const OTP_EXPIRE_MS = 10 * 60 * 1000;
+
+const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+const sendTwoFactorEmail = async ({ email, name, code, action = "verify" }) => {
+  const subject =
+    action === "disable"
+      ? "Your SkillSphere 2FA disable code"
+      : action === "login"
+        ? "Your SkillSphere sign-in code"
+        : "Your SkillSphere 2FA setup code";
+
+  const html = `
+    <h2>Hi ${name || "there"}!</h2>
+    <p>Your 6-digit SkillSphere code is:</p>
+    <p style="font-size: 24px; letter-spacing: 4px; font-weight: 700;">${code}</p>
+    <p>This code expires in 10 minutes.</p>
+  `;
+
+  await sendEmail({ to: email, subject, html, verificationCode: code });
+};
 
 export const setup2FA = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.user._id).select("+twoFactorSecret");
-
-    const secret = speakeasy.generateSecret({
-      name: `SkillSphere (${user.email})`,
-      length: 20,
-    });
-
-    user.twoFactorSecret = secret.base32;
-    user.twoFactorEnabled = false;
+    const user = await UserModel.findById(req.user._id);
+    const code = generateOtp();
+    user.twoFactorOtpCode = code;
+    user.twoFactorOtpExpire = new Date(Date.now() + OTP_EXPIRE_MS);
     await user.save({ validateBeforeSave: false });
 
-    const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
+    await sendTwoFactorEmail({
+      email: user.email,
+      name: user.name,
+      code,
+      action: "verify",
+    });
 
     return res.json({
       success: true,
-      qrCode: qrCodeUrl,
-      manualEntry: secret.base32,
+      message: "A 6-digit 2FA code has been sent to your email.",
     });
   } catch (error) {
     return res.status(500).json({
@@ -46,22 +66,15 @@ export const enable2FA = async (req, res) => {
         .json({ success: false, message: "Verification code is required" });
     }
 
-    const user = await UserModel.findById(req.user._id).select("+twoFactorSecret");
-    if (!user.twoFactorSecret) {
+    const user = await UserModel.findById(req.user._id);
+    if (!user.twoFactorOtpCode || !user.twoFactorOtpExpire) {
       return res.status(400).json({
         success: false,
         message: "Run 2FA setup first",
       });
     }
 
-    const valid = speakeasy.totp.verify({
-      secret: user.twoFactorSecret,
-      encoding: "base32",
-      token,
-      window: 1,
-    });
-
-    if (!valid) {
+    if (user.twoFactorOtpExpire.getTime() < Date.now() || user.twoFactorOtpCode !== token) {
       return res.status(400).json({
         success: false,
         message: "Invalid verification code",
@@ -69,6 +82,8 @@ export const enable2FA = async (req, res) => {
     }
 
     user.twoFactorEnabled = true;
+    user.twoFactorOtpCode = undefined;
+    user.twoFactorOtpExpire = undefined;
     await user.save({ validateBeforeSave: false });
 
     return res.json({
@@ -88,7 +103,7 @@ export const disable2FA = async (req, res) => {
   try {
     const { password, token } = req.body || {};
     const user = await UserModel.findById(req.user._id)
-      .select("+password +twoFactorSecret");
+      .select("+password");
 
     if (user.authProvider === "local" || user.password) {
       if (!password) {
@@ -106,18 +121,25 @@ export const disable2FA = async (req, res) => {
 
     if (user.twoFactorEnabled) {
       if (!token) {
-        return res.status(400).json({
-          success: false,
-          message: "Current 2FA code is required",
+        const otpCode = generateOtp();
+        user.twoFactorOtpCode = otpCode;
+        user.twoFactorOtpExpire = new Date(Date.now() + OTP_EXPIRE_MS);
+        await user.save({ validateBeforeSave: false });
+
+        await sendTwoFactorEmail({
+          email: user.email,
+          name: user.name,
+          code: otpCode,
+          action: "disable",
+        });
+
+        return res.json({
+          success: true,
+          message: "A 6-digit code has been sent to your email. Enter it to disable 2FA.",
+          otpSent: true,
         });
       }
-      const valid = speakeasy.totp.verify({
-        secret: user.twoFactorSecret,
-        encoding: "base32",
-        token,
-        window: 1,
-      });
-      if (!valid) {
+      if (!user.twoFactorOtpCode || !user.twoFactorOtpExpire || user.twoFactorOtpExpire.getTime() < Date.now() || user.twoFactorOtpCode !== token) {
         return res.status(400).json({
           success: false,
           message: "Invalid verification code",
@@ -126,7 +148,8 @@ export const disable2FA = async (req, res) => {
     }
 
     user.twoFactorEnabled = false;
-    user.twoFactorSecret = undefined;
+    user.twoFactorOtpCode = undefined;
+    user.twoFactorOtpExpire = undefined;
     await user.save({ validateBeforeSave: false });
 
     return res.json({
@@ -162,7 +185,7 @@ export const verify2FALogin = async (req, res) => {
       });
     }
 
-    const user = await UserModel.findById(decoded.id).select("+twoFactorSecret");
+    const user = await UserModel.findById(decoded.id);
     if (!user || !user.twoFactorEnabled) {
       return res.status(401).json({
         success: false,
@@ -170,19 +193,16 @@ export const verify2FALogin = async (req, res) => {
       });
     }
 
-    const valid = speakeasy.totp.verify({
-      secret: user.twoFactorSecret,
-      encoding: "base32",
-      token,
-      window: 1,
-    });
-
-    if (!valid) {
+    if (!user.twoFactorOtpCode || !user.twoFactorOtpExpire || user.twoFactorOtpExpire.getTime() < Date.now() || user.twoFactorOtpCode !== token) {
       return res.status(401).json({
         success: false,
         message: "Invalid verification code",
       });
     }
+
+    user.twoFactorOtpCode = undefined;
+    user.twoFactorOtpExpire = undefined;
+    await user.save({ validateBeforeSave: false });
 
     return sendAuthSuccess(res, user);
   } catch (error) {

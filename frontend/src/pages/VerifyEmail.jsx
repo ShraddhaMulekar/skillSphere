@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useSelector, useDispatch } from "react-redux";
@@ -16,20 +16,18 @@ export default function VerifyEmail() {
   const authUser = useSelector((state) => state.auth.user);
   const location = useLocation();  
   const dispatch = useDispatch();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() =>
+    authUser?.email ||
+    location.state?.email ||
+    new URLSearchParams(location.search).get("email") ||
+    localStorage.getItem("lastRegisteredEmail") ||
+    "",
+  );
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  // Prefill email from logged-in user or from navigation state (after registration)
-  useEffect(() => {
-    if (authUser?.email) {
-      setEmail(authUser.email);
-    } else if (location.state?.email) {
-      setEmail(location.state.email);
-    }
-  }, [authUser, location.state]);
+  const autoVerifyStarted = useRef(false);
 
   // Token Auto-Verification Mutation (GET)
   const tokenMutation = useMutation({
@@ -69,10 +67,11 @@ export default function VerifyEmail() {
   });
 
   useEffect(() => {
-    if (token) {
+    if (token && !autoVerifyStarted.current) {
+      autoVerifyStarted.current = true;
       tokenMutation.mutate();
     }
-  }, [token]);
+  }, [token, tokenMutation]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -113,6 +112,19 @@ export default function VerifyEmail() {
             
             {!codeMutation.isSuccess && (
               <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  label="Email"
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError("");
+                    setMessage("");
+                  }}
+                  placeholder="you@example.com"
+                  required
+                />
 
                 
                 <Input

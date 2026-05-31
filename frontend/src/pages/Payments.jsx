@@ -36,6 +36,7 @@ const loadRazorpay = () =>
 export default function Payments() {
   const queryClient = useQueryClient();
   const { user } = useSelector((state) => state.auth);
+  const userId = user?.id || user?._id;
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [fundForm, setFundForm] = useState({
@@ -52,7 +53,7 @@ export default function Payments() {
     queryFn: async () => (await getPayments()).data.payments,
   });
   const gigsQuery = useQuery({
-    queryKey: ["payments-gigs", user?.id, user?.role],
+    queryKey: ["payments-gigs", userId, user?.role],
     queryFn: async () => (await getGigs({ status: "all" })).data.gigs,
     enabled: user?.role === "client" || user?.role === "admin",
   });
@@ -114,8 +115,8 @@ export default function Payments() {
   const ownedGigs = useMemo(() => {
     if (!gigsQuery.data) return [];
     if (user?.role === "admin") return gigsQuery.data;
-    return gigsQuery.data.filter((gig) => String(gig.client?._id || gig.client) === String(user?.id));
-  }, [gigsQuery.data, user?.id, user?.role]);
+    return gigsQuery.data.filter((gig) => String(gig.client?._id || gig.client) === String(userId));
+  }, [gigsQuery.data, userId, user?.role]);
   const selectedGig = useMemo(
     () => ownedGigs.find((gig) => String(gig._id) === String(fundForm.gig)),
     [fundForm.gig, ownedGigs],
@@ -126,10 +127,10 @@ export default function Payments() {
       payments.filter((payment) =>
         user?.role === "admin"
           ? true
-          : String(payment.client?._id || payment.client) === String(user?.id) ||
-            String(payment.freelancer?._id || payment.freelancer) === String(user?.id),
+          : String(payment.client?._id || payment.client) === String(userId) ||
+            String(payment.freelancer?._id || payment.freelancer) === String(userId),
       ),
-    [payments, user?.id, user?.role],
+    [payments, userId, user?.role],
   );
   const pendingProviderPayments = useMemo(
     () => payments.filter((payment) => payment.status === "pending_provider"),
@@ -170,7 +171,8 @@ export default function Payments() {
     checkout.open();
   };
 
-  const canClientAct = (payment) => user?.role === "admin" || String(payment.client?._id || payment.client) === String(user?.id);
+  const canClientAct = (payment) =>
+    user?.role === "admin" || String(payment.client?._id || payment.client) === String(userId);
 
   if (query.isLoading) return <Loader text="Loading payments..." />;
 
