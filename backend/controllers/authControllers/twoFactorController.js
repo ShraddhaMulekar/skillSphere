@@ -104,8 +104,9 @@ export const disable2FA = async (req, res) => {
     const { password, token } = req.body || {};
     const user = await UserModel.findById(req.user._id)
       .select("+password");
+    const isGoogleAccount = user.authProvider === "google" || !!user.googleId;
 
-    if (user.authProvider === "local" || user.password) {
+    if (!isGoogleAccount) {
       if (!password) {
         return res
           .status(400)

@@ -22,7 +22,7 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    if (user.authProvider === "google" && !user.password) {
+    if (user.authProvider === "google" || user.googleId) {
       return res.status(400).json({
         success: false,
         message: "This email is registered with Google Sign-In. Please use Google Login.",

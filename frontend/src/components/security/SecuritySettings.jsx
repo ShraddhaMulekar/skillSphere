@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Alert from "../ui/Alert";
@@ -19,6 +20,7 @@ export default function SecuritySettings() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const isGoogleAccount = user?.authProvider === "google" || !!user?.googleId;
 
   const setupMutation = useMutation({
     mutationFn: setup2FA,
@@ -47,7 +49,7 @@ export default function SecuritySettings() {
   });
 
   const disableMutation = useMutation({
-    mutationFn: () => disable2FA({ password, token: code }),
+    mutationFn: () => disable2FA(isGoogleAccount ? { token: code } : { password, token: code }),
     onSuccess: (res) => {
       if (res.data?.otpSent) {
         setOtpSent(true);
@@ -73,6 +75,9 @@ export default function SecuritySettings() {
       <p className="text-slate-400 text-sm mb-4">
         Email verification, authenticator-based 2FA, and account protection
       </p>
+      <Link to="/forgot-password" className="inline-block mb-4 text-cyan-300 text-sm hover:underline">
+        Forgot password?
+      </Link>
 
       <Alert type="success" message={message} />
       <Alert type="error" message={error} />
@@ -122,13 +127,15 @@ export default function SecuritySettings() {
           </>
         ) : (
           <div className="space-y-3 max-w-sm">
-            <Input
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Your account password"
-            />
+            {!isGoogleAccount && (
+              <Input
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Your account password"
+              />
+            )}
             <Input
               label="6-digit email code"
               value={code}

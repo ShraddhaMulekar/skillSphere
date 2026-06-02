@@ -57,21 +57,34 @@ export const createGig = async (req, res) => {
 
 export const listGigs = async (req, res) => {
   try {
-    const { q, skill, location, minBudget, maxBudget, status = "open", mine } = req.query;
+    const { q, skill, location, minBudget, maxBudget, status = "all", mine } = req.query;
     const filter = {};
+    const andFilters = [];
 
     if (status !== "all") filter.status = status;
     if (mine === "1" && (req.user.role === ROLES.CLIENT || req.user.role === ROLES.ADMIN)) {
       filter.client = req.user._id;
     }
-    if (q) filter.$text = { $search: q };
-    if (skill) filter.skills = skill.toLowerCase();
-    if (location) filter.location = new RegExp(location, "i");
-    if (minBudget || maxBudget) {
-      filter.budgetMax = {};
-      if (minBudget) filter.budgetMax.$gte = Number(minBudget);
-      if (maxBudget) filter.budgetMin = { $lte: Number(maxBudget) };
+    if (q) {
+      const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      andFilters.push({
+        $or: [
+        { title: new RegExp(escaped, "i") },
+        { description: new RegExp(escaped, "i") },
+        { skills: new RegExp(escaped, "i") },
+        { location: new RegExp(escaped, "i") },
+        ],
+      });
     }
+    if (skill) andFilters.push({ skills: new RegExp(skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") });
+    if (location) andFilters.push({ location: new RegExp(location.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") });
+    if (minBudget || maxBudget) {
+      const budgetFilter = {};
+      if (minBudget) budgetFilter.$gte = Number(minBudget);
+      if (maxBudget) filter.budgetMin = { $lte: Number(maxBudget) };
+      if (Object.keys(budgetFilter).length) filter.budgetMax = budgetFilter;
+    }
+    if (andFilters.length) filter.$and = andFilters;
 
     const gigs = await GigModel.find(filter).populate(populateGig).sort({ createdAt: -1 });
     return res.json({ success: true, gigs });
