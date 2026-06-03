@@ -47,25 +47,54 @@ verificationCode: ${verificationCode || "N/A"}
     return;
   }
 
+  // Build transporter config — prefer service: 'gmail' when host is Gmail
   const host = process.env.EMAIL_HOST;
-  const port = Number(process.env.EMAIL_PORT || 587);
-  const secure = port === 465;
-  const transporter = nodemailer.createTransport({
-    host: host || undefined,
-    port,
-    secure,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM || `"SkillSphere" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
+  let transporterConfig;
 
-  console.log(`Email sent successfully to ${to}`);
+  if (host && host.toLowerCase().includes("gmail")) {
+    // Use nodemailer's built-in Gmail service for more reliable delivery
+    transporterConfig = {
+      service: "gmail",
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+    };
+  } else {
+    // Generic SMTP config for non-Gmail providers
+    const port = Number(process.env.EMAIL_PORT || 587);
+    const secure = port === 465;
+    transporterConfig = {
+      host: host || undefined,
+      port,
+      secure,
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    };
+  }
+
+  const transporter = nodemailer.createTransport(transporterConfig);
+
+  try {
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM || `"SkillSphere" <${emailUser}>`,
+      to,
+      subject,
+      html,
+    });
+
+    console.log(`[Email OK] Sent to ${to} | messageId: ${info.messageId}`);
+  } catch (smtpError) {
+    console.error(`[Email SMTP ERROR] Failed to send to ${to}:`, smtpError.message);
+    console.error(`[Email SMTP ERROR] Full details:`, smtpError);
+    throw smtpError; // re-throw so the caller knows it failed
+  }
 };
