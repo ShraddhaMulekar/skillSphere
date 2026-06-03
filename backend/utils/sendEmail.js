@@ -47,8 +47,13 @@ verificationCode: ${verificationCode || "N/A"}
     return;
   }
 
+  const host = process.env.EMAIL_HOST;
+  const port = Number(process.env.EMAIL_PORT || 587);
+  const secure = port === 465;
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: host || undefined,
+    port,
+    secure,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -56,7 +61,7 @@ verificationCode: ${verificationCode || "N/A"}
   });
 
   await transporter.sendMail({
-    from: `"SkillSphere" <${process.env.EMAIL_USER}>`,
+    from: process.env.EMAIL_FROM || `"SkillSphere" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     html,
